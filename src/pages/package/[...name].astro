@@ -1,0 +1,155 @@
+---
+import Base from '../../layouts/Base.astro';
+import { formatCount, formatDate, getCatalogue, type AgentPackage } from '../../lib/npm';
+
+export async function getStaticPaths() {
+  const { agents } = await getCatalogue();
+  return agents.map((pkg) => ({ params: { name: pkg.name }, props: { pkg } }));
+}
+
+interface Props {
+  pkg: AgentPackage;
+}
+
+const { pkg } = Astro.props;
+const external = 'noopener noreferrer nofollow';
+---
+
+<Base title={pkg.name} description={pkg.description || `${pkg.name}, a Standard Agent package.`}>
+  <p><a href="/">← All agents</a></p>
+  <h1>{pkg.name}</h1>
+  {pkg.description && <p class="lede">{pkg.description}</p>}
+
+  <pre><code>npm install {pkg.name}</code></pre>
+
+  <p class="note">
+    This page is built from the package's own metadata. Nobody has reviewed the package. It
+    contains executable code, so read it before you install it.
+  </p>
+
+  <h2>Entry agents</h2>
+  <ul class="tags">
+    {pkg.entryAgents.map((agent) => <li>{agent}</li>)}
+  </ul>
+
+  {
+    pkg.parentHooks.length > 0 && (
+      <>
+        <h2>Hooks added to a parent</h2>
+        <p class="lede">
+          When another agent composes one of these agents as a child, the package runs these hooks
+          on the parent's thread.
+        </p>
+        <ul class="plain-list">
+          {pkg.parentHooks.map((entry) =>
+            entry.hooks.map((hook) => (
+              <li>
+                <code>{hook.hook}</code> for <code>{entry.agent}</code>
+                {hook.stage && <> ({hook.stage})</>}
+                {hook.reason && <>: {hook.reason}</>}
+              </li>
+            )),
+          )}
+        </ul>
+      </>
+    )
+  }
+
+  {
+    pkg.effects.length > 0 && (
+      <>
+        <h2>Effects</h2>
+        <ul class="tags">
+          {pkg.effects.map((effect) => (
+            <li>{effect}</li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  {
+    pkg.threadEndpoints.length > 0 && (
+      <>
+        <h2>Thread endpoints</h2>
+        <ul class="tags">
+          {pkg.threadEndpoints.map((endpoint) => (
+            <li>{endpoint}</li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  <h2>Package</h2>
+  <dl class="facts">
+    <dt>Version</dt>
+    <dd>{pkg.version}</dd>
+    {
+      pkg.date && (
+        <>
+          <dt>Published</dt>
+          <dd>{formatDate(pkg.date)}</dd>
+        </>
+      )
+    }
+    {
+      pkg.specRange && (
+        <>
+          <dt>Specification helpers</dt>
+          <dd>
+            <code>@standardagents/spec {pkg.specRange}</code>
+          </dd>
+        </>
+      )
+    }
+    {
+      pkg.license && (
+        <>
+          <dt>Licence</dt>
+          <dd>{pkg.license}</dd>
+        </>
+      )
+    }
+    {
+      pkg.publisher && (
+        <>
+          <dt>Publisher</dt>
+          <dd>{pkg.publisher}</dd>
+        </>
+      )
+    }
+    {
+      pkg.monthlyDownloads !== null && (
+        <>
+          <dt>Downloads</dt>
+          <dd>{formatCount(pkg.monthlyDownloads)} in the last month</dd>
+        </>
+      )
+    }
+    <dt>Links</dt>
+    <dd>
+      <a href={pkg.links.npm} rel={external}>npm</a>
+      {
+        pkg.links.repository && (
+          <>
+            {' · '}
+            <a href={pkg.links.repository} rel={external}>
+              Repository
+            </a>
+          </>
+        )
+      }
+      {
+        pkg.links.homepage && (
+          <>
+            {' · '}
+            <a href={pkg.links.homepage} rel={external}>
+              Home page
+            </a>
+          </>
+        )
+      }
+    </dd>
+  </dl>
+</Base>

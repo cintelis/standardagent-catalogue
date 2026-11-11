@@ -1,0 +1,44 @@
+---
+import Filter from '../components/Filter.astro';
+import PackageCard from '../components/PackageCard.astro';
+import Base from '../layouts/Base.astro';
+import { getCatalogue } from '../lib/npm';
+
+const { agents } = await getCatalogue();
+---
+
+<Base
+  title="Agents"
+  description="An open index of Standard Agent packages published on npm."
+>
+  <h1>Agents</h1>
+  <p class="lede">
+    Packed Standard Agents published on npm. Each one installs with a package manager and runs in
+    any runtime that implements the specification.
+  </p>
+
+  {
+    agents.length > 0 ? (
+      <>
+        <Filter label="Search agents" total={agents.length} noun="agent package" />
+        <ul class="cards">
+          {agents.map((pkg) => (
+            <PackageCard pkg={pkg} href={`/package/${pkg.name}/`} tags={pkg.entryAgents} />
+          ))}
+        </ul>
+      </>
+    ) : (
+      <div class="empty">
+        <p>
+          <strong>No agent packages are published on npm yet.</strong>
+        </p>
+        <p>
+          The catalogue lists every package that carries the <code>standardagent</code> keyword
+          and a <code>standardagent</code> field in its <code>package.json</code>. See
+          <a href="/publish/">how to publish one</a>, or browse the
+          <a href="/ecosystem/">providers and tooling</a> that already exist.
+        </p>
+      </div>
+    )
+  }
+</Base>

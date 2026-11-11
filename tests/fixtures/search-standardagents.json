@@ -1,0 +1,18 @@
+{
+  "objects": [
+    {
+      "package": { "name": "@example/provider-acme", "date": "2026-10-10T00:00:00.000Z" },
+      "downloads": { "monthly": 5200 }
+    },
+    {
+      "package": { "name": "@example/agent-client", "date": "2026-10-11T00:00:00.000Z" },
+      "downloads": { "monthly": 310 }
+    },
+    {
+      "package": {
+        "name": "standardagent-example-issue-triage",
+        "date": "2026-10-02T09:30:00.000Z"
+      }
+    }
+  ]
+}

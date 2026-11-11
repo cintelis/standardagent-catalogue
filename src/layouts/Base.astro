@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+import { formatDate, getCatalogue } from '../lib/npm';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title } = Astro.props;
+// A package page passes publisher text here. Astro escapes quotes, so the
+// attribute is safe, and dropping angle brackets keeps markup out of it too.
+const description = Astro.props.description.replace(/[<>]/g, '');
+const { fetchedAt } = await getCatalogue();
+
+const nav = [
+  { href: '/', label: 'Agents' },
+  { href: '/ecosystem/', label: 'Ecosystem' },
+  { href: '/runtimes/', label: 'Runtimes' },
+  { href: '/publish/', label: 'Publish' },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href === '/' ? path === '/' || path.startsWith('/package/') : path.startsWith(href);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} · Standard Agent Catalogue</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">Standard Agent Catalogue</a>
+        <nav class="site-nav" aria-label="Main">
+          {
+            nav.map((item) => (
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          Package data comes from the public npm registry and was last read on {
+            formatDate(fetchedAt)
+          }. Names, descriptions, and links are written by each package's publisher.
+        </p>
+        <p>
+          A listing is automatic. It is not a review, an endorsement, or a statement that a
+          package conforms to the specification. Agent packages contain executable code, so read
+          one before you install it.
+        </p>
+        <p><a href="/catalogue.json">Catalogue as JSON</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

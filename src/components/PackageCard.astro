@@ -1,0 +1,41 @@
+---
+import { formatCount, formatDate, type CataloguePackage } from '../lib/npm';
+
+interface Props {
+  pkg: CataloguePackage;
+  /** Where the title links. An agent links to its page, other packages to npm. */
+  href: string;
+  tags?: string[];
+}
+
+const { pkg, href, tags = [] } = Astro.props;
+const external = href.startsWith('https://');
+// Search text for the filter. Keep letters, digits, and the characters a
+// package name uses, so publisher text never puts markup in an attribute.
+const search = [pkg.name, pkg.description, ...pkg.keywords, ...tags]
+  .join(' ')
+  .toLowerCase()
+  .replace(/[^\p{L}\p{N}@/._-]+/gu, ' ')
+  .trim();
+---
+
+<li class="card" data-card data-search={search}>
+  <h3 class="card-title">
+    <a href={href} rel={external ? 'noopener noreferrer nofollow' : undefined}>{pkg.name}</a>
+  </h3>
+  {pkg.description && <p>{pkg.description}</p>}
+  {
+    tags.length > 0 && (
+      <ul class="tags" aria-label="Entry agents">
+        {tags.map((tag) => (
+          <li>{tag}</li>
+        ))}
+      </ul>
+    )
+  }
+  <div class="meta">
+    <span>v{pkg.version}</span>
+    {pkg.date && <span>{formatDate(pkg.date)}</span>}
+    {pkg.monthlyDownloads !== null && <span>{formatCount(pkg.monthlyDownloads)} / month</span>}
+  </div>
+</li>

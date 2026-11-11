@@ -1,0 +1,47 @@
+---
+import Filter from '../components/Filter.astro';
+import PackageCard from '../components/PackageCard.astro';
+import Base from '../layouts/Base.astro';
+import { getCatalogue } from '../lib/npm';
+
+const { ecosystem } = await getCatalogue();
+const groups = [
+  { title: 'Providers', items: ecosystem.filter((pkg) => pkg.category === 'provider') },
+  { title: 'Clients and tooling', items: ecosystem.filter((pkg) => pkg.category === 'tooling') },
+].filter((group) => group.items.length > 0);
+---
+
+<Base
+  title="Ecosystem"
+  description="Providers, clients, and tooling for Standard Agents published on npm."
+>
+  <h1>Ecosystem</h1>
+  <p class="lede">
+    Packages that support Standard Agents without being agents themselves: model providers, client
+    libraries, and tooling. They carry the <code>standardagents</code> keyword on npm.
+  </p>
+
+  {
+    ecosystem.length > 0 ? (
+      <>
+        <Filter label="Search packages" total={ecosystem.length} noun="package" />
+        {groups.map((group) => (
+          <section data-group>
+            <h2>{group.title}</h2>
+            <ul class="cards">
+              {group.items.map((pkg) => (
+                <PackageCard pkg={pkg} href={pkg.links.npm} />
+              ))}
+            </ul>
+          </section>
+        ))}
+      </>
+    ) : (
+      <div class="empty">
+        <p>
+          <strong>No ecosystem packages were found on npm.</strong>
+        </p>
+      </div>
+    )
+  }
+</Base>

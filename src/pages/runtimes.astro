@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import { safeUrl } from '../lib/npm';
+import runtimes from '../data/runtimes.json';
+
+const listed = runtimes
+  .map((runtime) => ({ ...runtime, url: safeUrl(runtime.url) }))
+  .filter((runtime) => runtime.url)
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<Base
+  title="Runtimes"
+  description="Runtimes that execute Standard Agents."
+>
+  <h1>Runtimes</h1>
+  <p class="lede">
+    A runtime executes Standard Agents. An agent package that follows the specification runs the
+    same way in each of them.
+  </p>
+
+  <ul class="cards">
+    {
+      listed.map((runtime) => (
+        <li class="card">
+          <h3 class="card-title">
+            <a href={runtime.url} rel="noopener noreferrer">
+              {runtime.name}
+            </a>
+          </h3>
+          <p>{runtime.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2>Add a runtime</h2>
+  <p class="lede">
+    Runtimes are not npm packages with a shared marker, so this list is kept by hand in
+    <code>src/data/runtimes.json</code>. An entry needs a name, a public link, and one factual
+    sentence. The specification's own
+    <a href="https://standardagentspec.org/runtimes">Runtimes page</a> is the reference list.
+  </p>
+</Base>

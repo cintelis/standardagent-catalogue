@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+
+const packageJson = `{
+  "name": "standardagent-my-workflow",
+  "version": "0.3.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "keywords": ["standardagent"],
+  "standardagent": {
+    "entryAgents": ["my_agent"]
+  },
+  "peerDependencies": {
+    "@standardagents/spec": ">=0.2.0"
+  }
+}`;
+---
+
+<Base
+  title="Publish"
+  description="How to publish a Standard Agent package so that the catalogue lists it."
+>
+  <h1>Publish an agent</h1>
+  <p class="lede">
+    The catalogue has no accounts and no upload form. Publish a package to npm with the two
+    markers below, and it appears here the next time the catalogue is built.
+  </p>
+
+  <h2>What the catalogue looks for</h2>
+  <ol class="plain-list">
+    <li>The keyword <code>standardagent</code> in the package's <code>keywords</code>.</li>
+    <li>
+      A <code>standardagent</code> field in <code>package.json</code> whose
+      <code>entryAgents</code> lists at least one agent.
+    </li>
+  </ol>
+  <p class="lede">
+    Both come from the specification's
+    <a href="https://standardagentspec.org/latest/distribution/packaging">Packaging</a> page. A
+    package with the keyword but without the field is left out.
+  </p>
+
+  <pre><code>{packageJson}</code></pre>
+
+  <h2>What an agent's page shows</h2>
+  <ul class="plain-list">
+    <li>Entry agents, from <code>standardagent.entryAgents</code>.</li>
+    <li>Effects and thread endpoints, when the field lists them.</li>
+    <li>
+      Hooks the agent adds to a parent that composes it, from
+      <code>standardagent.parentHooks</code>.
+    </li>
+    <li>The <code>@standardagents/spec</code> range in <code>peerDependencies</code>.</li>
+    <li>Version, licence, publisher, and links, as npm reports them.</li>
+  </ul>
+
+  <h2>Providers and tooling</h2>
+  <p class="lede">
+    A package that supports agents without being one is listed under
+    <a href="/ecosystem/">Ecosystem</a> when it carries the <code>standardagents</code> keyword.
+    Adding <code>provider</code> to the keywords places it with the model providers.
+  </p>
+
+  <p class="note">
+    To remove a listing, remove the keyword and publish a new version, or unpublish the package
+    from npm. The catalogue only mirrors what npm reports.
+  </p>
+</Base>

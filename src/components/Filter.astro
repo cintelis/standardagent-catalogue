@@ -1,0 +1,46 @@
+---
+interface Props {
+  label: string;
+  total: number;
+  noun: string;
+}
+
+const { label, total, noun } = Astro.props;
+---
+
+<div data-filter data-noun={noun}>
+  <input class="search" type="search" placeholder={label} aria-label={label} autocomplete="off" />
+  <p class="count" role="status" data-count>{total} {noun}{total === 1 ? '' : 's'}</p>
+</div>
+
+<script>
+  // Filters the cards on the page as the reader types. Without script, every
+  // card stays visible.
+  for (const filter of document.querySelectorAll<HTMLElement>('[data-filter]')) {
+    const input = filter.querySelector('input');
+    const count = filter.querySelector('[data-count]');
+    const cards = [...document.querySelectorAll<HTMLElement>('[data-card]')];
+    const noun = filter.dataset.noun ?? 'package';
+
+    input?.addEventListener('input', () => {
+      const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      for (const card of cards) {
+        const haystack = card.dataset.search ?? '';
+        const match = words.every((word) => haystack.includes(word));
+        card.hidden = !match;
+        if (match) shown++;
+      }
+      // Hide a group's heading when the filter leaves it with no cards.
+      for (const section of document.querySelectorAll<HTMLElement>('[data-group]')) {
+        section.hidden = !section.querySelector('[data-card]:not([hidden])');
+      }
+      if (count) {
+        count.textContent =
+          words.length === 0
+            ? `${cards.length} ${noun}${cards.length === 1 ? '' : 's'}`
+            : `${shown} of ${cards.length} ${noun}${cards.length === 1 ? '' : 's'}`;
+      }
+    });
+  }
+</script>

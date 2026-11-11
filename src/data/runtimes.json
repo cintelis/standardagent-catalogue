@@ -1,0 +1,7 @@
+[
+  {
+    "name": "Standard Agents Builder",
+    "url": "https://standardagents.ai",
+    "description": "A runtime and builder interface from Standard Agents, the team that maintains the specification. It runs on Cloudflare Workers."
+  }
+]

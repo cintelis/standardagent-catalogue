@@ -1,0 +1,79 @@
+{
+  "standardagent-example-issue-triage": {
+    "name": "standardagent-example-issue-triage",
+    "version": "0.3.1",
+    "description": "Finds a GitHub issue and adds a category label and a priority label.",
+    "license": "MIT",
+    "keywords": ["standardagent", "standardagents", "github", "triage"],
+    "homepage": "https://example.com/issue-triage",
+    "repository": { "type": "git", "url": "git+https://github.com/example/issue-triage.git" },
+    "peerDependencies": { "@standardagents/spec": ">=0.2.0" },
+    "standardagent": {
+      "entryAgents": ["issue_triage"],
+      "effects": ["send_digest"],
+      "threadEndpoints": ["status.get"],
+      "parentHooks": {
+        "issue_triage": [
+          {
+            "hook": "triage_context",
+            "reason": "Makes new labels visible to the coordinator.",
+            "stage": "before_parent"
+          }
+        ]
+      }
+    }
+  },
+  "standardagent-example-hostile": {
+    "name": "standardagent-example-hostile",
+    "version": "0.1.0",
+    "description": "<script>alert('description')</script> A package that tries to inject markup.",
+    "license": "<img src=x onerror=alert(1)>",
+    "keywords": ["standardagent", "\"><script>alert('keyword')</script>"],
+    "homepage": "javascript:alert('homepage')",
+    "repository": "data:text/html,<script>alert('repository')</script>",
+    "peerDependencies": { "@standardagents/spec": "<script>alert('range')</script>" },
+    "standardagent": {
+      "entryAgents": ["<img src=x onerror=alert('agent')>", "safe_agent", 42, null],
+      "effects": "not a list",
+      "threadEndpoints": [{ "nested": true }],
+      "parentHooks": {
+        "safe_agent": [
+          { "hook": "<svg onload=alert('hook')>", "reason": "</li><script>alert('reason')</script>", "stage": "sideways" },
+          "not an object"
+        ]
+      }
+    }
+  },
+  "@example/standardagent-scoped": {
+    "name": "@example/standardagent-scoped",
+    "version": "0.4.0",
+    "description": "A scoped agent package.",
+    "keywords": ["standardagent"],
+    "repository": "https://user:secret@example.com/repo",
+    "standardagent": { "entryAgents": ["scoped_agent"] }
+  },
+  "standardagent-example-nofield": {
+    "name": "standardagent-example-nofield",
+    "version": "0.1.0",
+    "description": "Has the keyword but no standardagent field.",
+    "keywords": ["standardagent"]
+  },
+  "standardagent-example-mismatch": {
+    "name": "some-other-package",
+    "version": "0.1.0",
+    "keywords": ["standardagent"],
+    "standardagent": { "entryAgents": ["mismatch_agent"] }
+  },
+  "@example/provider-acme": {
+    "name": "@example/provider-acme",
+    "version": "0.45.7",
+    "description": "Acme provider for Standard Agents.",
+    "keywords": ["standardagents", "provider", "llm"]
+  },
+  "@example/agent-client": {
+    "name": "@example/agent-client",
+    "version": "0.45.7",
+    "description": "Client library for Standard Agents threads.",
+    "keywords": ["standardagents", "client"]
+  }
+}

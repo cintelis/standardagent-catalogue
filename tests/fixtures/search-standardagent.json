@@ -1,0 +1,38 @@
+{
+  "objects": [
+    {
+      "package": {
+        "name": "standardagent-example-issue-triage",
+        "date": "2026-10-02T09:30:00.000Z",
+        "publisher": { "username": "example-publisher" }
+      },
+      "downloads": { "monthly": 1840 }
+    },
+    {
+      "package": {
+        "name": "standardagent-example-hostile",
+        "date": "2026-09-01T00:00:00.000Z",
+        "publisher": { "username": "<b>bold</b>" }
+      },
+      "downloads": { "monthly": 12 }
+    },
+    {
+      "package": {
+        "name": "@example/standardagent-scoped",
+        "date": "not a date"
+      }
+    },
+    {
+      "package": { "name": "standardagent-example-nofield", "date": "2026-08-01T00:00:00.000Z" }
+    },
+    {
+      "package": { "name": "standardagent-example-mismatch", "date": "2026-08-01T00:00:00.000Z" }
+    },
+    {
+      "package": { "name": "../../escape", "date": "2026-08-01T00:00:00.000Z" }
+    },
+    {
+      "package": { "name": "standardagent-example-missing", "date": "2026-08-01T00:00:00.000Z" }
+    }
+  ]
+}
