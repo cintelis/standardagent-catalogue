@@ -1,0 +1,20 @@
+{
+  "title": "Order flow",
+  "subtitle": "From checkout to the warehouse",
+  "zones": [
+    {"id": "aws", "label": "AWS ap-southeast-2", "x": 260, "y": 90, "w": 700, "h": 260, "colour": "amber"}
+  ],
+  "nodes": [
+    {"id": "shopper", "label": "Shopper", "kind": "actor", "x": 40, "y": 160},
+    {"id": "api", "label": "Orders API", "kind": "service", "sub": "Node 24 on ECS", "zone": "aws", "x": 300, "y": 160},
+    {"id": "db", "label": "Postgres", "kind": "datastore", "zone": "aws", "x": 560, "y": 140, "w": 140, "h": 90},
+    {"id": "q", "label": "Order events", "kind": "queue", "zone": "aws", "x": 760, "y": 160}
+  ],
+  "edges": [
+    {"from": "shopper", "to": "api", "label": "POST /orders"},
+    {"from": "api", "to": "db", "label": "insert", "style": "data"},
+    {"from": "api", "to": "q", "label": "order.created", "style": "async", "exit": "bottom", "entry": "bottom",
+     "points": [[385, 290], [845, 290]]}
+  ],
+  "legend": true
+}

@@ -1,0 +1,20 @@
+{
+  "title": "Größe & Ünïcode <tags> \"quoted\" 'single'",
+  "subtitle": "日本語のサブタイトル — with an em dash",
+  "nodes": [
+    {"id": "n1", "label": "Café & Bar", "kind": "service", "sub": "a < b > c", "x": 40, "y": 110, "w": 200},
+    {"id": "n2", "label": "データベース", "kind": "datastore", "x": 320, "y": 100, "w": 160, "h": 90},
+    {"id": "n3", "label": "Tab\there", "kind": "queue", "x": 560, "y": 110},
+    {"id": "it's", "label": "Émoji 🚀 node", "kind": "ai", "x": 40, "y": 260},
+    {"id": "<x>", "label": "&amp; already escaped", "kind": "step", "x": 320, "y": 260, "w": 220}
+  ],
+  "edges": [
+    {"from": "n1", "to": "n2", "label": "SELECT * WHERE a < 5 && b > 2"},
+    {"from": "n2", "to": "n3", "label": "línea uno\nlínea dos", "style": "async"},
+    {"from": "it's", "to": "<x>", "label": "\"quoted\""}
+  ],
+  "texts": [
+    {"id": "t1", "label": "Ω ≈ 3.14 · ½ · ©", "x": 40, "y": 360, "w": 400}
+  ],
+  "legend": true
+}

@@ -1,0 +1,25 @@
+{
+  "title": "Orders schema",
+  "width": 1100,
+  "height": 640,
+  "id": "schema",
+  "zones": [
+    {"id": "core", "label": "Core tables", "x": 30, "y": 100, "w": 640, "h": 360, "color": "blue"}
+  ],
+  "entities": [
+    {"id": "customers", "name": "customers", "fields": ["PK id", "email", "created_at"], "x": 60, "y": 150, "zone": "core"},
+    {"id": "orders", "name": "orders", "fields": ["PK id", "FK customer_id", "total", "status", "placed_at"], "x": 380, "y": 150, "w": 250, "zone": "core"},
+    {"id": "refunds", "name": "refunds", "fields": ["PK id", "FK order_id", 12.5, true], "x": 760, "y": 150}
+  ],
+  "texts": [
+    {"id": "footnote", "label": "Figures in AUD", "x": 30, "y": 500, "w": 300},
+    {"id": "heading", "label": "Billing", "x": 760, "y": 110, "w": 200, "h": 30, "size": 14, "bold": true, "colour": "#111827", "align": "center"},
+    {"id": "small", "label": "Half sizes work", "x": 760, "y": 330, "size": 9.5, "align": "right"}
+  ],
+  "edges": [
+    {"from": "customers", "to": "orders", "label": "1..n", "style": "data", "exit": "right", "entry": "left"},
+    {"from": "orders", "to": "refunds", "label": "0..n", "style": "data", "both": true, "arrow": "open", "id": "orders-refunds"},
+    {"from": "footnote", "to": "core", "style": "weak"}
+  ],
+  "legend": {"x": 860, "y": 400, "kinds": ["datastore", "external"], "edges": ["data", "weak", "async"]}
+}

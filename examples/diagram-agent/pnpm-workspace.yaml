@@ -1,0 +1,4 @@
+minimumReleaseAgeExclude:
+  - '@standardagents/anthropic@0.45.10'
+  - '@standardagents/provider-pricing@0.45.10'
+  - '@standardagents/spec@0.45.10'

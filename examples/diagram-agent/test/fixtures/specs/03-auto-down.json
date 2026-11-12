@@ -1,0 +1,24 @@
+{
+  "title": "Nightly export",
+  "layout": "auto",
+  "direction": "down",
+  "nodes": [
+    {"id": "start", "label": "02:00 trigger", "kind": "terminal", "w": 150, "h": 44},
+    {"id": "extract", "label": "Extract", "kind": "worker", "sub": "reads the replica"},
+    {"id": "check", "label": "Rows match?", "kind": "decision", "w": 170, "h": 80},
+    {"id": "load", "label": "Load", "kind": "worker"},
+    {"id": "alert", "label": "Page on-call", "kind": "external"},
+    {"id": "gov", "label": "Statistics bureau", "kind": "gov"},
+    {"id": "loop_a", "label": "Retry", "kind": "step"},
+    {"id": "loop_b", "label": "Back off", "kind": "step"}
+  ],
+  "edges": [
+    {"from": "start", "to": "extract"},
+    {"from": "extract", "to": "check", "label": "row counts"},
+    {"from": "check", "to": "load", "label": "yes"},
+    {"from": "check", "to": "alert", "label": "no", "style": "async"},
+    {"from": "load", "to": "gov", "label": "CSV", "style": "data"},
+    {"from": "loop_a", "to": "loop_b"},
+    {"from": "loop_b", "to": "loop_a", "curved": true}
+  ]
+}

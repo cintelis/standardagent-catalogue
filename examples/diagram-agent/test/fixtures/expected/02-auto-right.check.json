@@ -1,0 +1,65 @@
+{
+  "path": "02-auto-right",
+  "pages": 1,
+  "cells": 45,
+  "errors": 1,
+  "warnings": 7,
+  "issues": [
+    {
+      "page": "Support pipeline",
+      "severity": "error",
+      "code": "overlap",
+      "cell": "review,audit",
+      "message": "shapes overlap by 170x64px"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-3",
+      "message": "triage -> review likely crosses agent; add waypoints or set exit/entry"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-6",
+      "message": "agent -> done likely crosses review; add waypoints or set exit/entry"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-6",
+      "message": "agent -> done likely crosses audit; add waypoints or set exit/entry"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-8",
+      "message": "triage -> audit likely crosses agent; add waypoints or set exit/entry"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-8",
+      "message": "triage -> audit likely crosses review; add waypoints or set exit/entry"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-9",
+      "message": "triage -> audit likely crosses agent; add waypoints or set exit/entry"
+    },
+    {
+      "page": "Support pipeline",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-9",
+      "message": "triage -> audit likely crosses review; add waypoints or set exit/entry"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Support pipeline",
+  "subtitle": "How a ticket moves from the inbox to an answer",
+  "layout": "auto",
+  "nodes": [
+    {"id": "inbox", "label": "Inbox", "kind": "ui"},
+    {"id": "triage", "label": "Triage model", "kind": "ai", "sub": "classifies and routes"},
+    {"id": "kb", "label": "Knowledge base", "kind": "datastore"},
+    {"id": "agent", "label": "Support agent", "kind": "actor"},
+    {"id": "review", "label": "Needs a human?", "kind": "decision", "w": 190, "h": 90},
+    {"id": "audit", "label": "Audit log", "kind": "security"},
+    {"id": "done", "label": "Resolved", "kind": "terminal"}
+  ],
+  "edges": [
+    {"from": "inbox", "to": "triage", "label": "new ticket"},
+    {"from": "triage", "to": "kb", "label": "search", "style": "ai"},
+    {"from": "triage", "to": "review", "label": "draft answer"},
+    {"from": "review", "to": "agent", "label": "yes", "style": "weak"},
+    {"from": "review", "to": "done", "label": "no"},
+    {"from": "agent", "to": "done", "label": "reply"},
+    {"from": "agent", "to": "triage", "label": "feedback", "style": "async"},
+    {"from": "triage", "to": "audit", "label": "decision", "style": "data"},
+    {"from": "triage", "to": "audit", "label": "trace", "style": "data"}
+  ],
+  "legend": true
+}
