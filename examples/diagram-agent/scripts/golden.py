@@ -6,7 +6,7 @@ record of what the original does.
 
 Run it with a Python that has drawgen installed, from this package's directory:
 
-    /path/to/drawio-tools/.venv/bin/python scripts/golden.py
+    /path/to/python-with-drawgen scripts/golden.py
 
 Run it again after drawgen changes, and port the change until the tests pass.
 """

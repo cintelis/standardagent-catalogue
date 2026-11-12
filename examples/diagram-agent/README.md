@@ -1,4 +1,4 @@
-# Diagram Designer: a Standard Agent built on drawio-tools
+# Diagram Designer: a Standard Agent that draws draw.io diagrams
 
 An agent that designs draw.io diagrams. You describe a system, a process, or a
 schema. The agent writes a diagram spec, builds it, reads the layout problems
@@ -18,10 +18,13 @@ with a much smaller Rust crate.
 
 The package is marked `"private": true`, so `npm publish` refuses it.
 
-## Why drawio-tools suits an agent
+## Why a diagram builder suits an agent
 
-[drawio-tools](https://github.com/cintelis/drawio-tools) already works as a loop:
-write a spec, build it, read the check report, fix, build again. That loop is
+The engine is a port of drawgen, a Python package that builds draw.io diagrams.
+drawgen is not public, and this sample does not need it to build or to run.
+
+drawgen already works as a loop: write a spec, build it, read the check report,
+fix, build again. That loop is
 what an agent does, and every step between the spec and the SVG is a pure
 calculation. The model makes the design decisions, and code does the geometry.
 
@@ -29,7 +32,7 @@ A packed Standard Agent is an npm package of JavaScript, so it cannot run the
 Python package or start a desktop program. This sample ports the part that is a
 pure calculation and leaves out the part that needs a computer:
 
-| drawio-tools | In this agent |
+| drawgen | In this agent |
 |---|---|
 | Spec format, kinds, zones, edge styles | Ported: `rust/src/theme.rs`, `rust/src/spec.rs` |
 | Auto layout | Ported: `rust/src/spec.rs` |
@@ -43,13 +46,15 @@ pure calculation and leaves out the part that needs a computer:
 
 ## Run it
 
-You need Node 22 or later, pnpm, and Rust. `rust-toolchain.toml` names the Rust
-version and the WebAssembly target, and rustup installs them on first use.
+You need Node 22 or later, pnpm, and Rust from rustup. `rust-toolchain.toml`
+asks for the stable toolchain with the WebAssembly target, and rustup adds the
+target on first use.
 
 ```bash
 pnpm install
-pnpm test     # Builds, runs the Rust tests, then tests the built package
-pnpm demo     # Builds the order-flow example and writes out/<name>.drawio.svg
+pnpm test       # Builds, runs the Rust tests, then tests the built package
+pnpm typecheck  # Checks the TypeScript without writing dist/
+pnpm demo       # Builds the order-flow example and writes out/<name>.drawio.svg
 pnpm demo test/fixtures/specs/05-problems.json   # A spec with layout problems
 ```
 
@@ -100,7 +105,7 @@ requester ──▶ agent (diagram_designer)      src/agents/diagram_designer.ts
 7. **`src/index.ts`** and **`package.json`**. What the package exports and
    declares.
 
-## How it stays true to drawio-tools
+## How it stays true to drawgen
 
 The Rust code must give the same output as the Python package. The tests prove
 it for every spec in `test/fixtures/specs`:
@@ -111,15 +116,16 @@ it for every spec in `test/fixtures/specs`:
 - `cargo test` compares the Rust output with those files, byte for byte.
 - `pnpm test` makes the same comparison through the built WebAssembly module.
 
-When drawio-tools changes, run the script again and port the change until the
+When drawgen changes, run the script again and port the change until the
 tests pass:
 
 ```bash
-/path/to/drawio-tools/.venv/bin/python scripts/golden.py
+/path/to/python-with-drawgen scripts/golden.py
 pnpm test
 ```
 
-The expected files were written by drawio-tools 0.2.0.
+The expected files were written by drawgen 0.2.0. They hold only the diagrams
+made from the specs in `test/fixtures/specs`.
 
 The port is stricter than the original in one way. Where Python would stop with
 an internal error, such as a coordinate that is a string, the Rust code reports
