@@ -1,0 +1,46 @@
+{
+  "name": "standardagent-sample-text-coach",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A sample Standard Agent that coaches a writer, with a TypeScript agent and a text-statistics tool written in Rust.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "standardagent"
+  ],
+  "standardagent": {
+    "entryAgents": [
+      "text_coach"
+    ]
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc -p tsconfig.json",
+    "test": "pnpm build && cargo test --manifest-path rust/Cargo.toml && node --test test/*.test.mjs",
+    "demo": "node scripts/demo.mjs"
+  },
+  "dependencies": {
+    "@standardagents/anthropic": "0.45.10",
+    "zod": "^4.6.7"
+  },
+  "peerDependencies": {
+    "@standardagents/spec": ">=0.2.0"
+  },
+  "devDependencies": {
+    "@standardagents/spec": "0.45.10",
+    "typescript": "^7.0.2"
+  }
+}

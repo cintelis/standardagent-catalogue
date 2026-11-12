@@ -63,6 +63,13 @@ that none of its markup or links reach the built pages.
 A listing is automatic. It is not a review, an endorsement, or a statement that
 a package conforms to the specification.
 
+## A sample agent
+
+[`examples/text-coach-agent`](examples/text-coach-agent) is a small agent package
+to read and change: a TypeScript agent whose tool is written in Rust and compiled
+to WebAssembly. It is a separate package with its own dependencies and tests, and
+the catalogue's build does not include it.
+
 ## Structure
 
 ```text

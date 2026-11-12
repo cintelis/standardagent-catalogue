@@ -1,0 +1,5 @@
+# Rust build output
+rust/target/
+
+# Written by scripts/build.mjs
+src/generated/
