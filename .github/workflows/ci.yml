@@ -64,7 +64,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: examples/${{ matrix.example }}/pnpm-lock.yaml
 
-      # rust-toolchain.toml in the example pins the Rust version, the
+      # rust-toolchain.toml in the example asks for the stable toolchain, the
       # components, and the WebAssembly target. rustup installs them here.
       - name: Install the Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install

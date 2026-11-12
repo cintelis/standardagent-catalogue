@@ -18,18 +18,17 @@ sample, not a listing.
 
 ## Run it
 
-You need Node 22 or later, pnpm, and Rust with the WebAssembly target:
+You need Node 22 or later, pnpm, and Rust from rustup. `rust-toolchain.toml`
+asks for the stable toolchain with the WebAssembly target, and rustup adds the
+target on first use.
 
-```bash
-rustup target add wasm32-unknown-unknown
-```
-
-Then, from this directory:
+From this directory:
 
 ```bash
 pnpm install
-pnpm test     # Builds, runs the Rust tests, then tests the built package
-pnpm demo     # Calls the tool on a sample text
+pnpm test       # Builds, runs the Rust tests, then tests the built package
+pnpm typecheck  # Checks the TypeScript without writing dist/
+pnpm demo       # Calls the tool on a sample text
 pnpm demo "Your own text goes here."
 ```
 
