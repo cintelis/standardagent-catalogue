@@ -29,6 +29,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs && tsc -p tsconfig.json",
+    "typecheck": "node scripts/build.mjs && tsc -p tsconfig.json --noEmit",
     "test": "pnpm build && cargo test --manifest-path rust/Cargo.toml && node --test test/*.test.mjs",
     "demo": "node scripts/demo.mjs"
   },

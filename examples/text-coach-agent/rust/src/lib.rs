@@ -316,7 +316,8 @@ mod tests {
 
     #[test]
     fn counts_paragraphs_and_unpunctuated_lines() {
-        let stats = analyze("A heading\n\nFirst paragraph here.\nStill the first.\r\n\r\nSecond one");
+        let stats =
+            analyze("A heading\n\nFirst paragraph here.\nStill the first.\r\n\r\nSecond one");
         assert_eq!(stats.paragraphs, 3);
         // The heading, two sentences, and the unfinished last line.
         assert_eq!(stats.sentences, 4);
@@ -365,6 +366,10 @@ mod tests {
                 "\"flesch_kincaid_grade\":-0.7}"
             )
         );
-        assert!(analyze("").to_json().contains("\"flesch_reading_ease\":null"));
+        assert!(
+            analyze("")
+                .to_json()
+                .contains("\"flesch_reading_ease\":null")
+        );
     }
 }

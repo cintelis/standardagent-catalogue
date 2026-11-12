@@ -12,7 +12,7 @@ const target = 'wasm32-unknown-unknown';
 
 // 1. Compile Rust to WebAssembly.
 try {
-  execFileSync('cargo', ['build', '--release', '--target', target], {
+  execFileSync('cargo', ['build', '--release', '--locked', '--target', target], {
     cwd: rustDir,
     stdio: 'inherit',
   });

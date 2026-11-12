@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# The jobs only read the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '12.11.2'
+
+jobs:
+  catalogue:
+    name: Catalogue
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Each action is pinned to the commit of the release named in the comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build from fixtures and test
+        run: pnpm test
+
+  examples:
+    name: Example (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [text-coach-agent, diagram-agent]
+    defaults:
+      run:
+        working-directory: examples/${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: examples/${{ matrix.example }}/pnpm-lock.yaml
+
+      # rust-toolchain.toml in the example pins the Rust version, the
+      # components, and the WebAssembly target. rustup installs them here.
+      - name: Install the Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - name: Rust formatting
+        run: cargo fmt --manifest-path rust/Cargo.toml --check
+      - name: Rust lints
+        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets --locked -- -D warnings
+      - name: Rust tests
+        run: cargo test --manifest-path rust/Cargo.toml --locked
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-workspace
+      - name: TypeScript typecheck
+        run: pnpm typecheck
+      - name: Build and test the package
+        run: pnpm test
