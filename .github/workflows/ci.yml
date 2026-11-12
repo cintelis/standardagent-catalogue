@@ -76,8 +76,10 @@ jobs:
       - name: Rust tests
         run: cargo test --manifest-path rust/Cargo.toml --locked
 
+      # The example has its own pnpm-workspace.yaml, so pnpm treats it as a
+      # separate project and reads its settings from there.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-workspace
+        run: pnpm install --frozen-lockfile
       - name: TypeScript typecheck
         run: pnpm typecheck
       - name: Build and test the package
