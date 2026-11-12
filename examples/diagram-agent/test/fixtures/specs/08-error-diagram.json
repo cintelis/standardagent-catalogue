@@ -1,0 +1,6 @@
+{
+  "title": "Reserved ids",
+  "nodes": [
+    {"id": "title", "label": "Clashes with the title cell", "x": 40, "y": 100}
+  ]
+}

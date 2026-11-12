@@ -1,0 +1,93 @@
+{
+  "path": "05-problems",
+  "pages": 1,
+  "cells": 24,
+  "errors": 4,
+  "warnings": 8,
+  "issues": [
+    {
+      "page": "A page with problems",
+      "severity": "error",
+      "code": "out-of-page",
+      "cell": "off",
+      "message": "(800,460 170x64) is outside the 900x500 page"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "error",
+      "code": "overlap",
+      "cell": "b,cyl",
+      "message": "shapes overlap by 30x64px"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "error",
+      "code": "overlap",
+      "cell": "over1,over2",
+      "message": "shapes overlap by 60x34px"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "error",
+      "code": "overlap",
+      "cell": "over2,long",
+      "message": "shapes overlap by 20x34px"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-1",
+      "message": "a -> b likely crosses blocker; add waypoints or set exit/entry"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-2",
+      "message": "a -> over1 likely crosses third; add waypoints or set exit/entry"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-3",
+      "message": "b -> long likely crosses blocker; add waypoints or set exit/entry"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-4",
+      "message": "over2 -> tight likely crosses long; add waypoints or set exit/entry"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "edge-through-shape",
+      "cell": "edge-7",
+      "message": "third -> blocker likely crosses a; add waypoints or set exit/entry"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "label-overflow",
+      "cell": "long",
+      "message": "text needs about 67px of height, the box has 60px; enlarge it or shorten the label"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "label-overflow",
+      "cell": "cyl",
+      "message": "text needs about 70px of height, the box has 46px; enlarge it or shorten the label"
+    },
+    {
+      "page": "A page with problems",
+      "severity": "warning",
+      "code": "label-overflow",
+      "cell": "nowrap",
+      "message": "text needs about 53px of height, the box has 16px; enlarge it or shorten the label"
+    }
+  ]
+}

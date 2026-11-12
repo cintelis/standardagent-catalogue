@@ -1,0 +1,27 @@
+{
+  "pages": [
+    {
+      "title": "Context",
+      "nodes": [
+        {"id": "user", "label": "Customer", "kind": "actor", "x": 40, "y": 100},
+        {"id": "shop", "label": "Web shop", "kind": "ui", "x": 300, "y": 100}
+      ],
+      "edges": [{"from": "user", "to": "shop", "label": "browses"}]
+    },
+    {
+      "title": "Containers",
+      "id": "containers",
+      "layout": "auto",
+      "nodes": [
+        {"id": "shop", "label": "Web shop", "kind": "ui"},
+        {"id": "api", "label": "API", "kind": "service"},
+        {"id": "pinned", "label": "Pinned", "kind": "security", "x": 40, "y": 300}
+      ],
+      "edges": [
+        {"from": "shop", "to": "api", "label": "JSON"},
+        {"from": "api", "to": "pinned", "label": "checks"}
+      ],
+      "legend": {"kinds": ["ui"]}
+    }
+  ]
+}

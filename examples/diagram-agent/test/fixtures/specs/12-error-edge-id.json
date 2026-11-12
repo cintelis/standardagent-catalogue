@@ -1,0 +1,11 @@
+{
+  "title": "Duplicate edge id",
+  "nodes": [
+    {"id": "a", "label": "A", "x": 40, "y": 100},
+    {"id": "b", "label": "B", "x": 300, "y": 100}
+  ],
+  "edges": [
+    {"from": "a", "to": "b", "id": "link"},
+    {"from": "b", "to": "a", "id": "link"}
+  ]
+}

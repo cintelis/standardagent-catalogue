@@ -1,0 +1,32 @@
+{
+  "title": "A page with problems",
+  "subtitle": "Every check should report something here",
+  "width": 900,
+  "height": 500,
+  "nodes": [
+    {"id": "a", "label": "Left", "kind": "service", "x": 40, "y": 120},
+    {"id": "blocker", "label": "In the way", "kind": "worker", "x": 300, "y": 120},
+    {"id": "b", "label": "Right", "kind": "service", "x": 560, "y": 120},
+    {"id": "over1", "label": "Overlaps", "kind": "ui", "x": 40, "y": 300},
+    {"id": "over2", "label": "Its neighbour", "kind": "ui", "x": 150.5, "y": 330.25},
+    {"id": "off", "label": "Off the page", "kind": "external", "x": 800, "y": 460},
+    {"id": "long", "label": "A label that is much too long to fit inside a default sized node without help", "kind": "step", "sub": "and a sub-line that is also far longer than the box can show", "x": 300, "y": 300},
+    {"id": "tight", "label": "Narrow decision text", "kind": "decision", "x": 560, "y": 300, "w": 100, "h": 60},
+    {"id": "note1", "label": "A note\nwith two lines", "kind": "note", "x": 40, "y": 420, "w": 160, "h": 60},
+    {"id": "note2", "label": "Note title", "kind": "note", "sub": "Note detail", "x": 220, "y": 420, "w": 160, "h": 60},
+    {"id": "cyl", "label": "A store with a long name", "kind": "datastore", "sub": "three\nlines\nhere", "x": 700, "y": 120, "w": 120, "h": 70},
+    {"id": "third", "label": "Thirds", "kind": "gov", "x": 33.333, "y": 210.001, "w": 100.005, "h": 40}
+  ],
+  "texts": [
+    {"id": "nowrap", "label": "This free text is wider than its box", "x": 400, "y": 440, "w": 60, "h": 20}
+  ],
+  "edges": [
+    {"from": "a", "to": "b", "label": "straight through"},
+    {"from": "a", "to": "over1", "exit": "top", "entry": "right"},
+    {"from": "b", "to": "long", "exit": "left", "entry": "top", "style": "async"},
+    {"from": "over2", "to": "tight", "curved": true, "label": "curved", "style": "ai"},
+    {"from": "note1", "to": "note2", "exit": "right"},
+    {"from": "tight", "to": "cyl", "entry": "bottom", "both": true},
+    {"from": "third", "to": "blocker", "points": [[200.5, 230], [200.5, 60], [385, 60]], "entry": "top"}
+  ]
+}

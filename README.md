@@ -63,6 +63,27 @@ that none of its markup or links reach the built pages.
 A listing is automatic. It is not a review, an endorsement, or a statement that
 a package conforms to the specification.
 
+## Sample agents
+
+Two agent packages to read and change. In each, TypeScript defines the agent and
+Rust, compiled to WebAssembly, does the work behind its tools.
+
+| Sample | Does |
+|---|---|
+| [`examples/text-coach-agent`](examples/text-coach-agent) | Reviews a piece of writing. A small Rust crate counts words and scores readability. Start here |
+| [`examples/diagram-agent`](examples/diagram-agent) | Designs draw.io diagrams. A Rust port of the drawio-tools builder, checker, and SVG renderer |
+
+Each sample is a separate package with its own dependencies and tests, and the
+catalogue's build does not include them.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`:
+
+- **Catalogue**: builds the site from the fixtures and runs its tests.
+- **Each sample**: Rust formatting, lints, and tests, then the TypeScript
+  typecheck, then the build and the package tests.
+
 ## Structure
 
 ```text

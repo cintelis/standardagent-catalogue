@@ -1,0 +1,6 @@
+# The Rust version this example is built and tested with. rustup reads this
+# file and installs the toolchain, the components, and the WebAssembly target.
+[toolchain]
+channel = "1.99.1"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]

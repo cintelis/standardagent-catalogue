@@ -1,0 +1,20 @@
+[package]
+name = "text_stats"
+version = "0.1.0"
+edition = "2024"
+description = "Text statistics for the Text Coach sample agent, compiled to WebAssembly."
+license = "MIT"
+publish = false
+
+[lib]
+# cdylib builds the .wasm file. rlib lets `cargo test` run the same code natively.
+crate-type = ["cdylib", "rlib"]
+
+# No dependencies: the crate uses only the Rust standard library.
+[dependencies]
+
+[profile.release]
+opt-level = "s"   # Optimise for a small .wasm file.
+lto = true
+panic = "abort"   # No unwinding code in the .wasm file.
+strip = true

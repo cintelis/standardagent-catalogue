@@ -1,0 +1,8 @@
+{
+  "pages": [
+    {"title": "Fine", "nodes": [{"id": "a", "label": "A", "x": 40, "y": 100}]},
+    {"title": "Broken", "nodes": [{"id": "a", "label": "A"}], "edges": [{"from": "a", "to": "b"}]},
+    {"nodes": "not a list"},
+    "not a page"
+  ]
+}

@@ -1,0 +1,5 @@
+pages[1].nodes[0]: no x/y; add coordinates or set layout: auto on the page
+pages[1].edges[0].to: no node, zone, entity or text has id 'b'
+pages[2].title: required
+pages[2].nodes: must be a list
+pages[3]: a page must be a mapping

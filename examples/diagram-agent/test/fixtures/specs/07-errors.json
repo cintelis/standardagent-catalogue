@@ -1,0 +1,29 @@
+{
+  "subtitle": "No title",
+  "colour": "red",
+  "zones": [
+    {"id": "z", "label": "Zone", "x": 0, "y": 0, "w": 100, "colour": "pink"},
+    {"id": "z", "label": "Same id", "x": 0, "y": 0, "w": 100, "h": 100}
+  ],
+  "nodes": [
+    {"id": "a", "label": "A", "kind": "server", "x": 10, "y": 10},
+    {"id": "b", "label": "B", "x": 10},
+    {"id": "c", "label": "C"},
+    {"id": "d", "zone": "nowhere", "fill": "#fff"},
+    {"label": "No id", "x": 1, "y": 2, "zone": "z"}
+  ],
+  "entities": [
+    {"id": "e", "name": "table", "x": 1, "y": 2},
+    {"id": "a", "name": "dupe", "fields": [], "x": 1, "y": 2, "zone": "ghost"}
+  ],
+  "edges": [
+    {"from": "a", "to": "missing", "style": "dotted"},
+    {"from": "a", "exit": "north", "entry": "left"},
+    {"to": "b", "colour": "#000"}
+  ],
+  "texts": [
+    {"id": "t", "x": 1, "y": 2},
+    {"id": "t2", "label": "ok", "x": 1}
+  ],
+  "legend": {"x": 1, "y": 2, "title": "Key"}
+}

@@ -1,0 +1,26 @@
+spec: unknown key 'colour'; allowed: ['direction', 'edges', 'entities', 'height', 'id', 'layout', 'legend', 'nodes', 'subtitle', 'texts', 'title', 'width', 'zones']
+spec.title: required
+spec.zones[0].h: required
+spec.zones[0].colour: 'pink' is not one of ['amber', 'blue', 'green', 'grey', 'purple', 'red', 'teal']
+spec.nodes[0].kind: 'server' is not one of ['actor', 'ai', 'datastore', 'decision', 'external', 'gov', 'note', 'queue', 'security', 'service', 'step', 'terminal', 'ui', 'worker']
+spec.nodes[1]: give both x and y, or neither (auto layout)
+spec.nodes[2]: no x/y; add coordinates or set layout: auto on the page
+spec.nodes[3]: unknown key 'fill'; allowed: ['h', 'id', 'kind', 'label', 'sub', 'w', 'x', 'y', 'zone']
+spec.nodes[3].label: required
+spec.nodes[3]: no x/y; add coordinates or set layout: auto on the page
+spec.nodes[3]: a node in a zone needs x/y; auto layout only places top-level nodes
+spec.nodes[4].id: required
+spec.entities[0].fields: required
+spec.edges[0].style: 'dotted' is not one of ['ai', 'async', 'data', 'sync', 'weak']
+spec.edges[1].to: required
+spec.edges[1].exit: 'north' must be top, bottom, left or right
+spec.edges[2]: unknown key 'colour'; allowed: ['arrow', 'both', 'curved', 'entry', 'exit', 'from', 'id', 'label', 'points', 'style', 'to']
+spec.edges[2].from: required
+spec.texts[0].label: required
+spec.texts[1].y: required
+spec.legend: unknown key 'title'; allowed: ['edges', 'kinds', 'x', 'y']
+spec: id 'a' is used more than once
+spec: id 'z' is used more than once
+spec.edges[0].to: no node, zone, entity or text has id 'missing'
+spec.nodes[3].zone: no zone has id 'nowhere'
+spec.entities[1].zone: no zone has id 'ghost'
