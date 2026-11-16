@@ -77,6 +77,25 @@ const TEXT_KEYS: &[&str] = &[
 const LEGEND_KEYS: &[&str] = &["edges", "kinds", "x", "y"];
 
 const SIDES: [&str; 4] = ["top", "bottom", "left", "right"];
+const ALIGNMENTS: [&str; 3] = ["left", "center", "right"];
+
+// A text colour, a text alignment, and an edge arrow go into a draw.io style,
+// which is a list of `key=value` pairs separated by `;`. drawgen copies them
+// in as they are, so a value with a `;` in it would add properties of its own
+// to the style. These two checks let through only values that cannot.
+
+/// `#RGB` or `#RRGGBB`.
+fn is_hex_colour(text: &str) -> bool {
+    text.strip_prefix('#').is_some_and(|digits| {
+        matches!(digits.len(), 3 | 6) && digits.bytes().all(|b| b.is_ascii_hexdigit())
+    })
+}
+
+/// A draw.io arrow name is a short run of letters, such as `block` or
+/// `classicThin`.
+fn is_arrow_name(text: &str) -> bool {
+    (1..=24).contains(&text.len()) && text.bytes().all(|b| b.is_ascii_alphabetic())
+}
 
 type Object = Map<String, Value>;
 
@@ -218,6 +237,14 @@ fn build_page(page: &Value, place: &str, index: usize) -> Result<Diagram, String
         if e.get("points").is_some_and(truthy) && waypoints(e).is_none() {
             problems.push(format!("{at}.points: must be a list of [x, y] pairs"));
         }
+        if let Some(arrow) = e.get("arrow")
+            && !arrow.as_str().is_some_and(is_arrow_name)
+        {
+            problems.push(format!(
+                "{at}.arrow: {} must be a draw.io arrow name, such as block, open, classic, oval, diamond or none",
+                repr(arrow)
+            ));
+        }
     }
     for (i, text) in texts.iter().enumerate() {
         let at = format!("{place}.texts[{i}]");
@@ -232,6 +259,24 @@ fn build_page(page: &Value, place: &str, index: usize) -> Result<Diagram, String
             &at,
             &mut problems,
         );
+        for key in ["colour", "color"] {
+            if let Some(colour) = t.get(key)
+                && !colour.as_str().is_some_and(is_hex_colour)
+            {
+                problems.push(format!(
+                    "{at}.{key}: {} must be a hex colour, such as #4B5563",
+                    repr(colour)
+                ));
+            }
+        }
+        if let Some(align) = t.get("align")
+            && !align.as_str().is_some_and(|a| ALIGNMENTS.contains(&a))
+        {
+            problems.push(format!(
+                "{at}.align: {} must be left, center or right",
+                repr(align)
+            ));
+        }
     }
     let legend = p.get("legend");
     if let Some(lg) = legend.and_then(Value::as_object) {

@@ -11,6 +11,12 @@ export const ZONE_COLOURS = ['blue', 'green', 'purple', 'amber', 'grey', 'red', 
 export const EDGE_STYLES = ['sync', 'async', 'data', 'ai', 'weak'] as const;
 
 // Bounds on every value, so that one tool call cannot ask for unbounded work.
+//
+// The specification limits a tool's arguments to a fixed set of Zod types
+// (`ToolArgsNode` in @standardagents/spec). A strict object and a tuple are
+// not among them, so this schema cannot refuse a key it does not name: Zod
+// drops it. The schema therefore names every spelling it expects a model to
+// use, such as `color` beside `colour`.
 const id = z.string().min(1).max(80);
 const label = z.string().min(1).max(300);
 const position = z.number().min(-20_000).max(20_000);
@@ -38,6 +44,7 @@ const args = z.object({
         w: size,
         h: size,
         colour: z.enum(ZONE_COLOURS).optional(),
+        color: z.enum(ZONE_COLOURS).optional().describe('The same as colour.'),
       }),
     )
     .max(40)
@@ -83,7 +90,11 @@ const args = z.object({
         style: z.enum(EDGE_STYLES).optional().describe('Default: sync.'),
         exit: side.optional().describe('The side of the source that the edge leaves from.'),
         entry: side.optional().describe('The side of the target that the edge arrives at.'),
-        points: z.array(z.array(position)).max(20).optional().describe('Waypoints, each [x, y].'),
+        points: z
+          .array(z.array(position).length(2))
+          .max(20)
+          .optional()
+          .describe('Waypoints, each [x, y].'),
         both: z.boolean().optional().describe('An arrowhead at both ends.'),
         curved: z.boolean().optional(),
       }),
