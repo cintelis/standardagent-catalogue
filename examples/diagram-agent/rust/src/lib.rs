@@ -252,6 +252,60 @@ mod tests {
         }
     }
 
+    /// Three nodes in a row, with an edge from the first to the last routed
+    /// below the middle one.
+    fn routed_below(extra: Value) -> Value {
+        let mut spec = json!({
+            "title": "T",
+            "nodes": [
+                {"id": "a", "label": "A", "x": 40, "y": 100},
+                {"id": "b", "label": "B", "x": 300, "y": 100},
+                {"id": "c", "label": "C", "x": 560, "y": 100},
+            ],
+            "edges": [{"from": "a", "to": "c", "points": [[125, 400], [645, 400]]}],
+        });
+        spec.as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        spec
+    }
+
+    #[test]
+    fn a_fitted_page_holds_the_edge_waypoints() {
+        let document = spec::build(&routed_below(json!({}))).unwrap();
+        // The lowest waypoint is at y=400, and the margin is 40.
+        assert_eq!(document.pages[0].height, 440);
+
+        let built = create(&routed_below(json!({})), "t").unwrap();
+        assert_eq!(built.report.to_json()["issues"], json!([]));
+        assert!(built.svgs[0].contains(r#"viewBox="0 0 770 440""#));
+    }
+
+    #[test]
+    fn a_waypoint_off_a_sized_page_is_reported_and_still_drawn() {
+        let built = create(&routed_below(json!({"width": 770, "height": 240})), "t").unwrap();
+        let report = built.report.to_json();
+        let issues = report["issues"].as_array().unwrap();
+        assert_eq!(issues.len(), 2, "{issues:?}");
+        for issue in issues {
+            assert_eq!(issue["severity"], "error");
+            assert_eq!(issue["code"], "out-of-page");
+        }
+        assert_eq!(
+            issues[0]["message"],
+            "waypoint (125,400) is outside the 770x240 page"
+        );
+        // The picture grows to show the edge, so the reader sees the problem.
+        assert!(built.svgs[0].contains(r#"viewBox="0 0 770 416""#));
+
+        let negative = json!({"title": "T", "nodes": [
+            {"id": "a", "label": "A", "x": 40, "y": 100},
+            {"id": "b", "label": "B", "x": 300, "y": 100},
+        ], "edges": [{"from": "a", "to": "b", "points": [[200, -30]]}]});
+        let report = create(&negative, "t").unwrap().report.to_json();
+        assert_eq!(report["issues"][0]["code"], "out-of-page");
+    }
+
     #[test]
     fn refuses_text_that_xml_does_not_allow() {
         let spec = json!({"title": "T", "nodes": [{"id": "a", "label": "bad \u{0001} char", "x": 40, "y": 80}]});

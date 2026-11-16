@@ -637,25 +637,26 @@ impl Diagram {
 
     // --------------------------------------------------------------- layout
 
-    /// `(left, top, right, bottom)` of every top-level shape except the title.
+    /// `(left, top, right, bottom)` of every top-level shape except the title,
+    /// and of every edge waypoint.
+    ///
+    /// drawgen measures the shapes only. The waypoints count here as well, so
+    /// that an edge routed around the shapes stays on the page that
+    /// `fit_page` sizes.
     fn content_bounds(&self) -> (f64, f64, f64, f64) {
-        let boxes: Vec<&PlacedBox> = self
+        let boxes = self
             .boxes
             .values()
             .filter(|b| b.parent == "1" && b.role != "title")
-            .collect();
-        if boxes.is_empty() {
-            return (0.0, 0.0, 0.0, 0.0);
-        }
-        let fold = |f: fn(f64, f64) -> f64, get: fn(&PlacedBox) -> f64| {
-            boxes.iter().map(|b| get(b)).reduce(f).unwrap_or(0.0)
-        };
-        (
-            fold(f64::min, |b| b.x),
-            fold(f64::min, |b| b.y),
-            fold(f64::max, |b| b.x + b.w),
-            fold(f64::max, |b| b.y + b.h),
-        )
+            .map(|b| (b.x, b.y, b.x + b.w, b.y + b.h));
+        let waypoints = self.cells.iter().flat_map(|cell| match &cell.shape {
+            Shape::Edge { points, .. } => points.as_slice(),
+            Shape::Vertex { .. } => &[],
+        });
+        boxes
+            .chain(waypoints.map(|&(x, y)| (x, y, x, y)))
+            .reduce(|a, b| (a.0.min(b.0), a.1.min(b.1), a.2.max(b.2), a.3.max(b.3)))
+            .unwrap_or((0.0, 0.0, 0.0, 0.0))
     }
 
     /// Sizes the page to its content, so nothing is off the page and there is
