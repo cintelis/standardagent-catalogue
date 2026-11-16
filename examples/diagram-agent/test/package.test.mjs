@@ -73,8 +73,10 @@ test('text from a spec is escaped and never becomes markup', () => {
       title: hostile,
       subtitle: hostile,
       nodes: [{ id: hostile, label: hostile, sub: hostile, x: 40, y: 120, w: 400 }],
-      texts: [{ id: 't', label: hostile, x: 40, y: 300, colour: '"><script>', align: '"><script>' }],
-      edges: [{ from: hostile, to: 't', label: hostile, arrow: '"><script>' }],
+      // A colour, an alignment, and an arrow are refused unless they are plain
+      // values. The style test below covers them.
+      texts: [{ id: 't', label: hostile, x: 40, y: 300 }],
+      edges: [{ from: hostile, to: 't', label: hostile }],
     },
     'hostile',
   );
@@ -193,6 +195,49 @@ test('the argument schema bounds what one call can ask for', async () => {
   assert.equal(ok({ name: 'n', title: 'T', nodes: [{ id: 'a', label: 'a'.repeat(301), x: 0, y: 0 }] }), false);
   const many = Array.from({ length: 201 }, (_, i) => ({ id: `n${i}`, label: 'N' }));
   assert.equal(ok({ name: 'n', title: 'T', layout: 'auto', nodes: many }), false);
+});
+
+test('the argument schema takes either spelling of a zone colour', async () => {
+  const tool = await pkg.tools.create_diagram();
+  const zone = { id: 'z', label: 'Z', x: 40, y: 80, w: 400, h: 300 };
+  const svgOf = async (extra) => {
+    const args = tool.args.parse({ name: 'n', title: 'T', zones: [{ ...zone, ...extra }] });
+    const result = await tool.execute({}, args);
+    assert.equal(result.status, 'success');
+    return Buffer.from(result.attachments[0].data, 'base64').toString('utf8');
+  };
+  // `color` reaches the Rust code and paints the zone, the same as `colour`.
+  assert.equal(await svgOf({ color: 'blue' }), await svgOf({ colour: 'blue' }));
+  assert.notEqual(await svgOf({ color: 'blue' }), await svgOf({}));
+  assert.equal(tool.args.safeParse({ name: 'n', title: 'T', zones: [{ ...zone, color: 'pink' }] }).success, false);
+});
+
+test('a waypoint is exactly two numbers', async () => {
+  const { args } = await pkg.tools.create_diagram();
+  const node = { id: 'a', label: 'A', x: 40, y: 80 };
+  const ok = (points) =>
+    args.safeParse({ name: 'n', title: 'T', nodes: [node], edges: [{ from: 'a', to: 'a', points }] }).success;
+  assert.equal(ok([[1, 2]]), true);
+  assert.equal(ok([[1, 2, 3]]), false);
+  assert.equal(ok([[1]]), false);
+});
+
+test('a value cannot add properties to a draw.io style', () => {
+  const node = { id: 'a', label: 'A', x: 40, y: 80 };
+  const smuggled = '#000;shape=image;image=https://example.com/x.png';
+  const specs = [
+    [{ title: 'T', texts: [{ id: 't', label: 'T', x: 0, y: 0, colour: smuggled }] }, /spec\.texts\[0\]\.colour/],
+    [{ title: 'T', texts: [{ id: 't', label: 'T', x: 0, y: 0, align: 'left;shape=image' }] }, /spec\.texts\[0\]\.align/],
+    [{ title: 'T', nodes: [node], edges: [{ from: 'a', to: 'a', arrow: 'open;shape=image' }] }, /spec\.edges\[0\]\.arrow/],
+    [{ title: 'T', texts: [{ id: 't', label: 'T', x: 0, y: 0, colour: '"><script>' }] }, /spec\.texts\[0\]\.colour/],
+  ];
+  for (const [spec, message] of specs) {
+    assert.throws(() => createDiagram(spec, 't'), (error) => {
+      assert.ok(error instanceof DiagramSpecError);
+      assert.match(error.message, message);
+      return true;
+    });
+  }
 });
 
 test('a file name is made only of lower-case letters, digits, and hyphens', () => {

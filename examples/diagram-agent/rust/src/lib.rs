@@ -307,6 +307,47 @@ mod tests {
     }
 
     #[test]
+    fn refuses_a_value_that_would_add_to_a_style() {
+        let node = json!({"id": "a", "label": "A", "x": 40, "y": 80});
+        let text = |extra: Value| {
+            let mut t = json!({"id": "t", "label": "T", "x": 0, "y": 0});
+            t.as_object_mut()
+                .unwrap()
+                .extend(extra.as_object().unwrap().clone());
+            json!({"title": "T", "texts": [t]})
+        };
+        let edge = |arrow: Value| json!({"title": "T", "nodes": [node], "edges": [{"from": "a", "to": "a", "arrow": arrow}]});
+        let smuggled = "#000;shape=image;image=https://example.com/x.png";
+        for (spec, at) in [
+            (text(json!({"colour": smuggled})), "spec.texts[0].colour"),
+            (text(json!({"color": "red"})), "spec.texts[0].color"),
+            (text(json!({"colour": 5})), "spec.texts[0].colour"),
+            (
+                text(json!({"align": "left;shape=image"})),
+                "spec.texts[0].align",
+            ),
+            (edge(json!("open;shape=image")), "spec.edges[0].arrow"),
+            (edge(json!("")), "spec.edges[0].arrow"),
+            (edge(Value::Null), "spec.edges[0].arrow"),
+        ] {
+            let error = create(&spec, "t")
+                .err()
+                .unwrap_or_else(|| panic!("{at}: built"));
+            assert!(error.contains(at), "{at}: {error}");
+        }
+
+        // The values a spec is meant to use still build.
+        for spec in [
+            text(json!({"colour": "#111827", "align": "center"})),
+            text(json!({"color": "#abc", "align": "right"})),
+            edge(json!("classicThin")),
+        ] {
+            let built = create(&spec, "t").unwrap();
+            assert!(!built.xml.contains("shape=image"));
+        }
+    }
+
+    #[test]
     fn refuses_text_that_xml_does_not_allow() {
         let spec = json!({"title": "T", "nodes": [{"id": "a", "label": "bad \u{0001} char", "x": 40, "y": 80}]});
         assert!(create(&spec, "t").is_err_and(|e| e.contains("control character")));

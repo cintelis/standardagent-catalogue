@@ -127,7 +127,7 @@ pnpm test
 The expected files were written by drawgen 0.2.0. They hold only the diagrams
 made from the specs in `test/fixtures/specs`.
 
-The port differs from the original in two ways, and neither changes the output
+The port differs from the original in three ways, and none changes the output
 for the specs in `test/fixtures/specs`:
 
 - Where Python would stop with an internal error, such as a coordinate that is
@@ -137,6 +137,9 @@ for the specs in `test/fixtures/specs`:
   without a word from the checker. Here a fitted page grows to hold the
   waypoints, the picture covers them, and the checker reports a waypoint that
   is off a page whose size the spec sets.
+- A text colour must be a hex colour, a text alignment must be `left`,
+  `center` or `right`, and an edge arrow must be a name made of letters.
+  drawgen copies these three values into a draw.io style as they are.
 
 ## What the sample does not do
 
@@ -164,6 +167,16 @@ for the specs in `test/fixtures/specs`:
 - The argument schema bounds every value: the number of nodes and edges, the
   length of each label, and the range of each coordinate. `src/wasm.ts` also
   refuses a request over 1,000,000 bytes before any memory is allocated.
+- The argument schema drops a key it does not name. The specification limits
+  a tool's arguments to a fixed set of Zod types, and a strict object is not
+  one of them, so the schema cannot refuse the key. The Rust code would name
+  an unknown key, but it never sees one. The schema takes `color` as well as
+  `colour` for a zone, because that is the spelling a model is likely to mix up.
+- A draw.io style is a list of `key=value` pairs separated by `;`. The Rust
+  code refuses a text colour, a text alignment, or an edge arrow that could add
+  a pair of its own, such as `#000;shape=image;image=https://...`. The tool's
+  schema does not offer those three fields; the check protects code that calls
+  `createDiagram` directly.
 - The tool lists at most 40 issues from the check report, errors first, and
   counts the rest by code. A crowded page can make the checker report thousands
   of overlaps, and the model needs the first few, not all of them. The attached
