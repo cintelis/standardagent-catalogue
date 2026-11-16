@@ -1,6 +1,6 @@
 {
   "name": "@cintelisai/diagram-agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Standard Agent that designs draw.io diagrams. A TypeScript agent drives a diagram builder, checker, and SVG renderer written in Rust and compiled to WebAssembly.",
   "license": "MIT",
   "author": "Cintelis",
