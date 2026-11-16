@@ -70,9 +70,11 @@ jobs:
           cache: pnpm
           cache-dependency-path: ${{ steps.tag.outputs.dir }}/pnpm-lock.yaml
 
+      # The Rust steps run only for a package that has a Rust crate.
       # rust-toolchain.toml in the package names the Rust release, the
       # components, and the WebAssembly target. rustup installs them here.
       - name: Install the Rust toolchain
+        if: hashFiles(format('{0}/rust/Cargo.toml', steps.tag.outputs.dir)) != ''
         working-directory: ${{ steps.tag.outputs.dir }}
         run: rustup show active-toolchain || rustup toolchain install
 
@@ -82,6 +84,7 @@ jobs:
 
       # The same checks as CI, on the exact commit that is released.
       - name: Rust formatting and lints
+        if: hashFiles(format('{0}/rust/Cargo.toml', steps.tag.outputs.dir)) != ''
         working-directory: ${{ steps.tag.outputs.dir }}
         run: |
           cargo fmt --manifest-path rust/Cargo.toml --check

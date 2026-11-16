@@ -1,0 +1,16 @@
+{
+  "title": "Three dots rising in turn",
+  "width": 200,
+  "height": 100,
+  "background": "#ffffff",
+  "shapes": [
+    {"id": "a", "type": "circle", "x": 60, "y": 60, "r": 10, "fill": "#0969da"},
+    {"id": "b", "type": "circle", "x": 100, "y": 60, "r": 10, "fill": "#0969da"},
+    {"id": "c", "type": "circle", "x": 140, "y": 60, "r": 10, "fill": "#0969da"}
+  ],
+  "steps": [
+    {"targets": ["a", "b", "c"], "to": {"y": 36}, "duration": 300, "ease": "outQuad", "stagger": 120},
+    {"targets": ["a", "b", "c"], "to": {"y": 60}, "duration": 300, "ease": "inQuad", "stagger": 120, "at": 300},
+    {"targets": ["a"], "to": {"y": 60}, "duration": 400}
+  ]
+}

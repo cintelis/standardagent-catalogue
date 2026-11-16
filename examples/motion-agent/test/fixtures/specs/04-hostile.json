@@ -1,0 +1,13 @@
+{
+  "title": "</title><script>alert('title')</script> & \"quotes\"",
+  "width": 240,
+  "height": 120,
+  "shapes": [
+    {"id": "t", "type": "text", "x": 120, "y": 40, "text": "<script>alert('text')</script> <img src=x onerror=alert(1)> & ]]>", "size": 10},
+    {"id": "p", "type": "path", "d": "M 20 90 L 220 90", "stroke": "#0969da", "strokeWidth": 3}
+  ],
+  "steps": [
+    {"targets": ["p"], "to": {"draw": 0}, "duration": 400},
+    {"targets": ["p"], "to": {"draw": 1}, "duration": 400}
+  ]
+}

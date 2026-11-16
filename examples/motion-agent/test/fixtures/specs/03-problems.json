@@ -1,0 +1,24 @@
+{
+  "title": "An animation with one of each problem the checker reports",
+  "width": 300,
+  "height": 200,
+  "background": "#ffffff",
+  "shapes": [
+    {"id": "lost", "type": "rect", "x": 600, "y": 40, "w": 40, "h": 40},
+    {"id": "jumper", "type": "circle", "x": 40, "y": 100, "r": 14, "fill": "#cf222e"},
+    {"id": "strobe", "type": "rect", "x": 60, "y": 20, "w": 200, "h": 160, "fill": "#1f2328"},
+    {"id": "spinner", "type": "rect", "x": 130, "y": 80, "w": 40, "h": 40, "fill": "#8250df"}
+  ],
+  "steps": [
+    {"targets": ["jumper"], "to": {"x": 260}, "duration": 1200, "ease": "inOutSine", "at": 0},
+    {"targets": ["spinner"], "to": {"rotate": 360}, "duration": 1200, "ease": "linear", "at": 0},
+    {"targets": ["strobe"], "to": {"opacity": 0}, "duration": 100, "ease": "linear", "at": 0},
+    {"targets": ["strobe"], "to": {"opacity": 1}, "duration": 100, "ease": "linear"},
+    {"targets": ["strobe"], "to": {"opacity": 0}, "duration": 100, "ease": "linear"},
+    {"targets": ["strobe"], "to": {"opacity": 1}, "duration": 100, "ease": "linear"},
+    {"targets": ["strobe"], "to": {"opacity": 0}, "duration": 100, "ease": "linear"},
+    {"targets": ["strobe"], "to": {"opacity": 1}, "duration": 100, "ease": "linear"},
+    {"targets": ["strobe"], "to": {"opacity": 0}, "duration": 100, "ease": "linear"},
+    {"targets": ["strobe"], "to": {"opacity": 1}, "duration": 100, "ease": "linear"}
+  ]
+}

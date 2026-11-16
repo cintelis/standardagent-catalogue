@@ -1,0 +1,19 @@
+spec.title: required: one line that says what the animation shows
+spec.width: 5000 must be between 16 and 2000
+spec.background: "red" must be a hex colour, such as #0969da, or "none"
+spec.shapes[0].w: required
+spec.shapes[0].h: required
+spec.shapes[1].id: "a" is already the id of spec.shapes[0]
+spec.shapes[2].id: "1bad" must start with a letter and hold only letters, digits, - and _
+spec.shapes[2].type: "blob" is not one of rect, circle, line, text, path
+spec.shapes[2].w: required
+spec.shapes[2].h: required
+spec.shapes[3].fill: "#000;stroke=red" must be a hex colour, such as #0969da, or "none"
+spec.shapes[4].d: must be SVG path data that starts with M, such as "M 10 10 L 90 10"
+spec.shapes[5]: a line with no stroke and no fill cannot be seen; give it a stroke
+spec.steps[0].targets[0]: no shape has the id "nobody"
+spec.steps[1].to: unknown key "colour"; a step can change x, y, scale, rotate, opacity, draw
+spec.steps[1].to.draw: "label" is a text, and a text cannot be drawn on
+spec.steps[2].to.opacity: 4 must be between 0 and 1
+spec.steps[2].ease: "wobble" is not one of linear, inQuad, outQuad, inOutQuad, inCubic, outCubic, inOutCubic, inQuart, outQuart, inOutQuart, inSine, outSine, inOutSine, inExpo, outExpo, inOutExpo, inCirc, outCirc, inOutCirc, inBack, outBack, inOutBack, inElastic, outElastic, inOutElastic, inBounce, outBounce, inOutBounce
+spec.steps[3]: ends at 24000ms; an animation can be at most 20000ms long

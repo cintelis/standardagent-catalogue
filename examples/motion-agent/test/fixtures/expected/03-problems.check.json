@@ -1,0 +1,31 @@
+{
+  "width": 300,
+  "height": 200,
+  "duration_ms": 1900,
+  "loop": true,
+  "shapes": 4,
+  "keyframes": 43,
+  "bytes": 1629,
+  "errors": 2,
+  "warnings": 1,
+  "issues": [
+    {
+      "severity": "error",
+      "code": "never-visible",
+      "shape": "lost",
+      "message": "\"lost\" is never seen: it is off the 300x200 canvas, fully transparent, at size 0, or never drawn"
+    },
+    {
+      "severity": "warning",
+      "code": "loop-jump",
+      "shape": "jumper",
+      "message": "\"jumper\" jumps when the loop starts again: x ends at 260 and starts at 40. Add a step that takes it back, or set loop to false"
+    },
+    {
+      "severity": "error",
+      "code": "flashing",
+      "shape": "strobe",
+      "message": "\"strobe\" flashes three times within a second, which can harm people with photosensitive epilepsy; slow it down or fade it less"
+    }
+  ]
+}

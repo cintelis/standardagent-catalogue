@@ -105,9 +105,11 @@ What a sample must hold to:
   goes into XML, HTML, SVG, or a style string.
 - **Give WebAssembly no imports.** A module that imports nothing can reach no
   network, file, or clock.
-- **Load on Cloudflare Workers.** Ship the `.wasm` file and import it under the
-  `workerd` condition, as both samples do. A Worker may not compile a module
-  from bytes at run time.
+- **Load on Cloudflare Workers.** A sample with WebAssembly ships the `.wasm`
+  file and imports it under the `workerd` condition, as the text coach and the
+  diagram agent do. A Worker may not compile a module from bytes at run time.
+- **Use a library only if it runs without a browser.** The motion agent uses
+  Anime.js this way. Pin it to one exact release.
 - **Pin dependencies.** Commit `pnpm-lock.yaml` and `Cargo.lock`.
 
 The root README's "WebAssembly or a container" section says what belongs in
@@ -141,8 +143,9 @@ a phone's width.
 - Branch from `main`, and keep one change to a pull request.
 - Say what the change does and why, and how you tested it.
 - CI must pass. It builds the site from the fixtures and runs its tests, and
-  for each sample it runs `cargo fmt --check`, `cargo clippy` with warnings as
-  errors, `cargo test`, the TypeScript typecheck, and the package tests.
+  for each sample it runs the TypeScript typecheck and the package tests, and
+  for a sample with Rust, `cargo fmt --check`, `cargo clippy` with warnings as
+  errors, and `cargo test`.
 - A pull request from a fork runs CI with read-only access and no secrets.
 - Pin a new GitHub Action to a commit, with the release in a comment, as the
   existing workflows do.

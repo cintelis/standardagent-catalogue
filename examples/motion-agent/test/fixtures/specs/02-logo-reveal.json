@@ -1,0 +1,21 @@
+{
+  "title": "The catalogue logo assembles, and its name fades in",
+  "width": 480,
+  "height": 200,
+  "background": "#0d1117",
+  "loop": false,
+  "shapes": [
+    {"id": "p1", "type": "rect", "x": 60, "y": 60, "w": 34, "h": 34, "radius": 8, "fill": "#f0f6fc", "opacity": 0, "scale": 0.4},
+    {"id": "p2", "type": "rect", "x": 106, "y": 60, "w": 34, "h": 34, "radius": 8, "fill": "#f0f6fc", "opacity": 0, "scale": 0.4},
+    {"id": "p3", "type": "rect", "x": 60, "y": 106, "w": 34, "h": 34, "radius": 8, "fill": "#f0f6fc", "opacity": 0, "scale": 0.4},
+    {"id": "agent", "type": "circle", "x": 123, "y": 123, "r": 17, "fill": "#3fb950", "opacity": 0, "scale": 0},
+    {"id": "rule", "type": "line", "x": 176, "y": 124, "x2": 420, "y2": 124, "stroke": "#3fb950", "strokeWidth": 2, "draw": 0},
+    {"id": "name", "type": "text", "x": 298, "y": 96, "text": "Standard Agent Catalogue", "size": 20, "weight": "bold", "fill": "#f0f6fc", "opacity": 0}
+  ],
+  "steps": [
+    {"targets": ["p1", "p2", "p3"], "to": {"opacity": 1, "scale": 1}, "duration": 500, "ease": "outBack", "stagger": 90},
+    {"targets": ["agent"], "to": {"opacity": 1, "scale": 1}, "duration": 700, "ease": "outElastic"},
+    {"targets": ["rule"], "to": {"draw": 1}, "duration": 600, "ease": "inOutCubic", "at": 900},
+    {"targets": ["name"], "to": {"opacity": 1}, "duration": 500, "ease": "outQuad", "at": 1100}
+  ]
+}

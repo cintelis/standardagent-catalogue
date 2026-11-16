@@ -1,0 +1,66 @@
+{
+  "name": "@cintelisai/motion-agent",
+  "version": "0.1.0",
+  "description": "A Standard Agent that designs animated SVG pictures. It writes a scene and a timeline, computes the motion with Anime.js, and returns one SVG file that plays without script.",
+  "license": "MIT",
+  "author": "Cintelis",
+  "homepage": "https://github.com/cintelis/standardagent-catalogue/tree/main/examples/motion-agent#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cintelis/standardagent-catalogue.git",
+    "directory": "examples/motion-agent"
+  },
+  "bugs": {
+    "url": "https://github.com/cintelis/standardagent-catalogue/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "standardagent",
+    "agent",
+    "animation",
+    "svg",
+    "animejs"
+  ],
+  "standardagent": {
+    "entryAgents": [
+      "motion_designer"
+    ]
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc -p tsconfig.json",
+    "typecheck": "node scripts/build.mjs && tsc -p tsconfig.json --noEmit",
+    "test": "pnpm build && node --test test/*.test.mjs",
+    "demo": "node scripts/demo.mjs",
+    "golden": "pnpm build && node scripts/golden.mjs"
+  },
+  "dependencies": {
+    "@standardagents/anthropic": "0.45.10",
+    "animejs": "4.5.0",
+    "zod": "^4.6.7"
+  },
+  "peerDependencies": {
+    "@standardagents/spec": "^0.45.10"
+  },
+  "devDependencies": {
+    "@standardagents/spec": "0.45.10",
+    "typescript": "^7.0.2"
+  }
+}
