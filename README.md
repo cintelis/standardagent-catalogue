@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/banner.png" alt="Standard Agent Catalogue: agents you can install" width="100%">
+<a href="https://agents.cintelis.ai"><img src="docs/screenshots/banner.png" alt="Standard Agent Catalogue: agents you can install" width="100%"></a>
 
 # Standard Agent Catalogue
 
@@ -9,14 +9,16 @@
 It hosts no packages. It reads the public npm registry when it builds,
 and it links back to npm.
 
+[![Live site](https://img.shields.io/badge/live-agents.cintelis.ai-0a7a58?style=flat-square)](https://agents.cintelis.ai)
 [![CI](https://github.com/cintelis/standardagent-catalogue/actions/workflows/ci.yml/badge.svg)](https://github.com/cintelis/standardagent-catalogue/actions/workflows/ci.yml)
 [![Deploy](https://github.com/cintelis/standardagent-catalogue/actions/workflows/deploy.yml/badge.svg)](https://github.com/cintelis/standardagent-catalogue/actions/workflows/deploy.yml)
 [![Astro 7](https://img.shields.io/badge/Astro-7-0c1411?style=flat-square&logo=astro&logoColor=white)](https://astro.build)
 [![Node 22 or later](https://img.shields.io/badge/node-%E2%89%A5%2022-0a7a58?style=flat-square&logo=nodedotjs&logoColor=white)](package.json)
 [![Samples: Rust to WebAssembly](https://img.shields.io/badge/samples-Rust%20%E2%86%92%20WebAssembly-0c1411?style=flat-square&logo=rust&logoColor=white)](#sample-agents)
 [![Hosting: Cloudflare](https://img.shields.io/badge/hosting-Cloudflare-0a7a58?style=flat-square&logo=cloudflare&logoColor=white)](#keeping-it-current)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-0c1411?style=flat-square)](LICENSE)
 
-[What's inside](#whats-inside) · [How it works](#how-it-works) · [Run it yourself](#commands) · [Sample agents](#sample-agents) · [Deploy](#keeping-it-current)
+[**Open the live site**](https://agents.cintelis.ai) · [What's inside](#whats-inside) · [How it works](#how-it-works) · [Run it yourself](#commands) · [Sample agents](#sample-agents) · [Contribute](#contributing)
 
 </div>
 
@@ -143,11 +145,13 @@ each day and deploys nothing.
    - `CLOUDFLARE_API_TOKEN`: the token.
    - `CLOUDFLARE_ACCOUNT_ID`: the account ID from the Cloudflare dashboard.
 3. Run the Deploy workflow from the Actions page. The first run creates a
-   Worker called `standardagent-catalogue` and prints its `workers.dev`
-   address.
+   Worker called `standardagent-catalogue`.
 
-To use your own domain, add it to the Worker in the Cloudflare dashboard. To
-deploy by hand, run `pnpm build`, then `pnpm exec wrangler deploy`.
+The site is at [agents.cintelis.ai](https://agents.cintelis.ai). `routes` in
+`wrangler.jsonc` names that address, and Cloudflare creates its DNS record and
+certificate on deploy. A fork must change it to a domain in its own Cloudflare
+account, or remove `routes` and use the `workers.dev` address that the deploy
+prints. To deploy by hand, run `pnpm build`, then `pnpm exec wrangler deploy`.
 
 GitHub turns off a scheduled workflow after 60 days without a commit to the
 repository. It sends an email first, and the Actions page has a button to turn
@@ -264,6 +268,17 @@ repository's samples show, not everything the specification allows.
 - **Catalogue**: builds the site from the fixtures and runs its tests.
 - **Each sample**: Rust formatting, lints, and tests, then the TypeScript
   typecheck, then the build and the package tests.
+
+## Contributing
+
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the three ways to help: publish your
+own agent so that the catalogue lists it, add a sample agent, or change the
+site. Listing an agent needs no pull request.
+
+## Licence
+
+[MIT](LICENSE). The sample agents are under the same licence, so you can copy
+one as the start of your own.
 
 ## Structure
 
