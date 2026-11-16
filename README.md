@@ -158,13 +158,15 @@ a package conforms to the specification.
 
 ## Sample agents
 
-Two agent packages to read and change. In each, TypeScript defines the agent and
-Rust, compiled to WebAssembly, does the work behind its tools.
+Three agent packages to read and change. In two of them, TypeScript defines
+the agent and Rust, compiled to WebAssembly, does the work behind its tools. In
+the third, the work is done by an ordinary JavaScript library.
 
 | Sample | Does |
 |---|---|
 | [`examples/text-coach-agent`](examples/text-coach-agent) | Reviews a piece of writing. A small Rust crate counts words and scores readability. Start here |
 | [`examples/diagram-agent`](examples/diagram-agent) | Designs draw.io diagrams. A Rust diagram builder, checker, and SVG renderer. Published as `@cintelisai/diagram-agent` |
+| [`examples/motion-agent`](examples/motion-agent) | Designs animated SVG pictures that play without script. Anime.js works out the motion, with no browser. Published as `@cintelisai/motion-agent` |
 
 Each sample is a separate package with its own dependencies and tests, and the
 catalogue's build does not include them.
@@ -173,6 +175,12 @@ catalogue's build does not include them.
 <img src="examples/diagram-agent/test/fixtures/expected/01-order-flow.p1.svg" alt="An order-flow diagram that the diagram sample drew" width="90%">
 <br>
 <sub>Drawn by the diagram sample from <a href="examples/diagram-agent/test/fixtures/specs/01-order-flow.json">a 20-line spec</a>. The file opens in draw.io for editing.</sub>
+</div>
+
+<div align="center">
+<img src="examples/motion-agent/test/fixtures/expected/02-logo-reveal.svg" alt="The catalogue logo assembles, and its name fades in" width="60%">
+<br>
+<sub>Animated by the motion sample from <a href="examples/motion-agent/test/fixtures/specs/02-logo-reveal.json">a 20-line spec</a>. The file holds no script. Reload the page to play it again.</sub>
 </div>
 
 ### WebAssembly or a container

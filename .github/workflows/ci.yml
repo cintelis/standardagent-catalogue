@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [text-coach-agent, diagram-agent]
+        example: [text-coach-agent, diagram-agent, motion-agent]
     defaults:
       run:
         working-directory: examples/${{ matrix.example }}
@@ -64,16 +64,21 @@ jobs:
           cache: pnpm
           cache-dependency-path: examples/${{ matrix.example }}/pnpm-lock.yaml
 
-      # rust-toolchain.toml in the example asks for the stable toolchain, the
+      # The Rust steps run only for an example that has a Rust crate.
+      # rust-toolchain.toml in the example names the Rust release, the
       # components, and the WebAssembly target. rustup installs them here.
       - name: Install the Rust toolchain
+        if: hashFiles(format('examples/{0}/rust/Cargo.toml', matrix.example)) != ''
         run: rustup show active-toolchain || rustup toolchain install
 
       - name: Rust formatting
+        if: hashFiles(format('examples/{0}/rust/Cargo.toml', matrix.example)) != ''
         run: cargo fmt --manifest-path rust/Cargo.toml --check
       - name: Rust lints
+        if: hashFiles(format('examples/{0}/rust/Cargo.toml', matrix.example)) != ''
         run: cargo clippy --manifest-path rust/Cargo.toml --all-targets --locked -- -D warnings
       - name: Rust tests
+        if: hashFiles(format('examples/{0}/rust/Cargo.toml', matrix.example)) != ''
         run: cargo test --manifest-path rust/Cargo.toml --locked
 
       # The example has its own pnpm-workspace.yaml, so pnpm treats it as a

@@ -1,0 +1,5 @@
+# Written by scripts/build.mjs
+src/generated/
+
+# Written by scripts/demo.mjs
+out/
