@@ -11,11 +11,12 @@ const { title } = Astro.props;
 // A package page passes publisher text here. Astro escapes quotes, so the
 // attribute is safe, and dropping angle brackets keeps markup out of it too.
 const description = Astro.props.description.replace(/[<>]/g, '');
-const { fetchedAt } = await getCatalogue();
+const { agents, ecosystem, fetchedAt } = await getCatalogue();
 
-const nav = [
-  { href: '/', label: 'Agents' },
-  { href: '/ecosystem/', label: 'Ecosystem' },
+// A tab with a count shows it in a small pill, as a code-hosting site does.
+const nav: { href: string; label: string; count?: number }[] = [
+  { href: '/', label: 'Agents', count: agents.length },
+  { href: '/ecosystem/', label: 'Ecosystem', count: ecosystem.length },
   { href: '/runtimes/', label: 'Runtimes' },
   { href: '/publish/', label: 'Publish' },
 ];
@@ -37,12 +38,16 @@ const isCurrent = (href: string) =>
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/">Standard Agent Catalogue</a>
+        <div class="brand-row">
+          <a class="brand" href="/">Standard Agent Catalogue</a>
+          <span class="label">Open index</span>
+        </div>
         <nav class="site-nav" aria-label="Main">
           {
             nav.map((item) => (
               <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                {item.label}
+                <span>{item.label}</span>
+                {item.count !== undefined && <span class="counter">{item.count}</span>}
               </a>
             ))
           }

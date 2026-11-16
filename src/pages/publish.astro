@@ -20,11 +20,13 @@ const packageJson = `{
   title="Publish"
   description="How to publish a Standard Agent package so that the catalogue lists it."
 >
-  <h1>Publish an agent</h1>
-  <p class="lede">
-    The catalogue has no accounts and no upload form. Publish a package to npm with the two
-    markers below, and it appears here the next time the catalogue is built.
-  </p>
+  <div class="page-head">
+    <h1>Publish an agent</h1>
+    <p class="lede">
+      The catalogue has no accounts and no upload form. Publish a package to npm with the two
+      markers below, and it appears here the next time the catalogue is built.
+    </p>
+  </div>
 
   <h2>What the catalogue looks for</h2>
   <ol class="plain-list">
@@ -35,7 +37,7 @@ const packageJson = `{
     </li>
   </ol>
   <p class="lede">
-    Both come from the specification's
+    Both come from the specification's{' '}
     <a href="https://standardagentspec.org/latest/distribution/packaging">Packaging</a> page. A
     package with the keyword but without the field is left out.
   </p>
@@ -56,7 +58,7 @@ const packageJson = `{
 
   <h2>Providers and tooling</h2>
   <p class="lede">
-    A package that supports agents without being one is listed under
+    A package that supports agents without being one is listed under{' '}
     <a href="/ecosystem/">Ecosystem</a> when it carries the <code>standardagents</code> keyword.
     Adding <code>provider</code> to the keywords places it with the model providers.
   </p>

@@ -13,13 +13,15 @@ const listed = runtimes
   title="Runtimes"
   description="Runtimes that execute Standard Agents."
 >
-  <h1>Runtimes</h1>
-  <p class="lede">
-    A runtime executes Standard Agents. An agent package that follows the specification runs the
-    same way in each of them.
-  </p>
+  <div class="page-head">
+    <h1>Runtimes</h1>
+    <p class="lede">
+      A runtime executes Standard Agents. An agent package that follows the specification runs the
+      same way in each of them.
+    </p>
+  </div>
 
-  <ul class="cards">
+  <ul class="cards box">
     {
       listed.map((runtime) => (
         <li class="card">
@@ -38,7 +40,7 @@ const listed = runtimes
   <p class="lede">
     Runtimes are not npm packages with a shared marker, so this list is kept by hand in
     <code>src/data/runtimes.json</code>. An entry needs a name, a public link, and one factual
-    sentence. The specification's own
+    sentence. The specification's own{' '}
     <a href="https://standardagentspec.org/runtimes">Runtimes page</a> is the reference list.
   </p>
 </Base>

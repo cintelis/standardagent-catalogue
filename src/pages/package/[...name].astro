@@ -16,140 +16,174 @@ const external = 'noopener noreferrer nofollow';
 ---
 
 <Base title={pkg.name} description={pkg.description || `${pkg.name}, a Standard Agent package.`}>
-  <a class="back" href="/">← All agents</a>
-  <h1>{pkg.name}</h1>
-  {pkg.description && <p class="lede">{pkg.description}</p>}
+  <h1 class="crumbs">
+    <a href="/">Agents</a>
+    <span class="sep">/</span>
+    <strong>{pkg.name}</strong>
+    <span class="label">v{pkg.version}</span>
+  </h1>
 
-  <pre class="command"><code>npm install {pkg.name}</code></pre>
+  <div class="columns">
+    <div>
+      <section class="box">
+        <h2 class="box-header">Install</h2>
+        <div class="box-body">
+          <pre><code>npm install {pkg.name}</code></pre>
+        </div>
+      </section>
 
-  <p class="note">
-    This page is built from the package's own metadata. Nobody has reviewed the package. It
-    contains executable code, so read it before you install it.
-  </p>
+      <p class="note">
+        This page is built from the package's own metadata. Nobody has reviewed the package. It
+        contains executable code, so read it before you install it.
+      </p>
 
-  <h2>Entry agents</h2>
-  <ul class="tags">
-    {pkg.entryAgents.map((agent) => <li>{agent}</li>)}
-  </ul>
+      <section class="box">
+        <h2 class="box-header">
+          Entry agents
+          <span class="counter">{pkg.entryAgents.length}</span>
+        </h2>
+        <div class="box-body">
+          <ul class="tags">
+            {pkg.entryAgents.map((agent) => <li>{agent}</li>)}
+          </ul>
+        </div>
+      </section>
 
-  {
-    pkg.parentHooks.length > 0 && (
-      <>
-        <h2>Hooks added to a parent</h2>
-        <p class="lede">
-          When another agent composes one of these agents as a child, the package runs these hooks
-          on the parent's thread.
-        </p>
-        <ul class="plain-list">
-          {pkg.parentHooks.map((entry) =>
-            entry.hooks.map((hook) => (
-              <li>
-                <code>{hook.hook}</code> for <code>{entry.agent}</code>
-                {hook.stage && <> ({hook.stage})</>}
-                {hook.reason && <>: {hook.reason}</>}
-              </li>
-            )),
-          )}
-        </ul>
-      </>
-    )
-  }
-
-  {
-    pkg.effects.length > 0 && (
-      <>
-        <h2>Effects</h2>
-        <ul class="tags">
-          {pkg.effects.map((effect) => (
-            <li>{effect}</li>
-          ))}
-        </ul>
-      </>
-    )
-  }
-
-  {
-    pkg.threadEndpoints.length > 0 && (
-      <>
-        <h2>Thread endpoints</h2>
-        <ul class="tags">
-          {pkg.threadEndpoints.map((endpoint) => (
-            <li>{endpoint}</li>
-          ))}
-        </ul>
-      </>
-    )
-  }
-
-  <h2>Package</h2>
-  <dl class="facts">
-    <dt>Version</dt>
-    <dd>{pkg.version}</dd>
-    {
-      pkg.date && (
-        <>
-          <dt>Published</dt>
-          <dd>{formatDate(pkg.date)}</dd>
-        </>
-      )
-    }
-    {
-      pkg.specRange && (
-        <>
-          <dt>Specification helpers</dt>
-          <dd>
-            <code>@standardagents/spec {pkg.specRange}</code>
-          </dd>
-        </>
-      )
-    }
-    {
-      pkg.license && (
-        <>
-          <dt>Licence</dt>
-          <dd>{pkg.license}</dd>
-        </>
-      )
-    }
-    {
-      pkg.publisher && (
-        <>
-          <dt>Publisher</dt>
-          <dd>{pkg.publisher}</dd>
-        </>
-      )
-    }
-    {
-      pkg.monthlyDownloads !== null && (
-        <>
-          <dt>Downloads</dt>
-          <dd>{formatCount(pkg.monthlyDownloads)} in the last month</dd>
-        </>
-      )
-    }
-    <dt>Links</dt>
-    <dd>
-      <a href={pkg.links.npm} rel={external}>npm</a>
       {
-        pkg.links.repository && (
-          <>
-            {' · '}
-            <a href={pkg.links.repository} rel={external}>
-              Repository
-            </a>
-          </>
+        pkg.parentHooks.length > 0 && (
+          <section class="box">
+            <h2 class="box-header">Hooks added to a parent</h2>
+            <div class="box-body">
+              <p class="lede">
+                When another agent composes one of these agents as a child, the package runs these
+                hooks on the parent's thread.
+              </p>
+              <ul class="plain-list">
+                {pkg.parentHooks.map((entry) =>
+                  entry.hooks.map((hook) => (
+                    <li>
+                      <code>{hook.hook}</code> for <code>{entry.agent}</code>
+                      {hook.stage && <> ({hook.stage})</>}
+                      {hook.reason && <>: {hook.reason}</>}
+                    </li>
+                  )),
+                )}
+              </ul>
+            </div>
+          </section>
         )
       }
+
       {
-        pkg.links.homepage && (
-          <>
-            {' · '}
-            <a href={pkg.links.homepage} rel={external}>
-              Home page
-            </a>
-          </>
+        pkg.effects.length > 0 && (
+          <section class="box">
+            <h2 class="box-header">
+              Effects
+              <span class="counter">{pkg.effects.length}</span>
+            </h2>
+            <div class="box-body">
+              <ul class="tags">
+                {pkg.effects.map((effect) => (
+                  <li>{effect}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
         )
       }
-    </dd>
-  </dl>
+
+      {
+        pkg.threadEndpoints.length > 0 && (
+          <section class="box">
+            <h2 class="box-header">
+              Thread endpoints
+              <span class="counter">{pkg.threadEndpoints.length}</span>
+            </h2>
+            <div class="box-body">
+              <ul class="tags">
+                {pkg.threadEndpoints.map((endpoint) => (
+                  <li>{endpoint}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )
+      }
+    </div>
+
+    <aside class="side">
+      <h2>About</h2>
+      {pkg.description && <p class="lede">{pkg.description}</p>}
+      <dl class="facts">
+        <dt>Version</dt>
+        <dd>{pkg.version}</dd>
+        {
+          pkg.date && (
+            <>
+              <dt>Published</dt>
+              <dd>{formatDate(pkg.date)}</dd>
+            </>
+          )
+        }
+        {
+          pkg.specRange && (
+            <>
+              <dt>Specification helpers</dt>
+              <dd>
+                <code>@standardagents/spec {pkg.specRange}</code>
+              </dd>
+            </>
+          )
+        }
+        {
+          pkg.license && (
+            <>
+              <dt>Licence</dt>
+              <dd>{pkg.license}</dd>
+            </>
+          )
+        }
+        {
+          pkg.publisher && (
+            <>
+              <dt>Publisher</dt>
+              <dd>{pkg.publisher}</dd>
+            </>
+          )
+        }
+        {
+          pkg.monthlyDownloads !== null && (
+            <>
+              <dt>Downloads</dt>
+              <dd>{formatCount(pkg.monthlyDownloads)} in the last month</dd>
+            </>
+          )
+        }
+        <dt>Links</dt>
+        <dd>
+          <a href={pkg.links.npm} rel={external}>npm</a>
+          {
+            pkg.links.repository && (
+              <>
+                {' · '}
+                <a href={pkg.links.repository} rel={external}>
+                  Repository
+                </a>
+              </>
+            )
+          }
+          {
+            pkg.links.homepage && (
+              <>
+                {' · '}
+                <a href={pkg.links.homepage} rel={external}>
+                  Home page
+                </a>
+              </>
+            )
+          }
+        </dd>
+      </dl>
+    </aside>
+  </div>
 </Base>

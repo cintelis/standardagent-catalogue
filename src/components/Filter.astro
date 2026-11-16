@@ -8,7 +8,7 @@ interface Props {
 const { label, total, noun } = Astro.props;
 ---
 
-<div data-filter data-noun={noun}>
+<div class="toolbar" data-filter data-noun={noun}>
   <input class="search" type="search" placeholder={label} aria-label={label} autocomplete="off" />
   <p class="count" role="status" data-count>{total} {noun}{total === 1 ? '' : 's'}</p>
 </div>

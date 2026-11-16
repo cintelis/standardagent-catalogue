@@ -35,7 +35,11 @@ const search = [pkg.name, pkg.description, ...pkg.keywords, ...tags]
   }
   <div class="meta">
     <span>v{pkg.version}</span>
-    {pkg.date && <span>{formatDate(pkg.date)}</span>}
-    {pkg.monthlyDownloads !== null && <span>{formatCount(pkg.monthlyDownloads)} / month</span>}
+    {pkg.date && <span>Updated {formatDate(pkg.date)}</span>}
+    {
+      pkg.monthlyDownloads !== null && (
+        <span>{formatCount(pkg.monthlyDownloads)} downloads a month</span>
+      )
+    }
   </div>
 </li>

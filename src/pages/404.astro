@@ -3,10 +3,12 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="Page not found" description="This page is not in the catalogue.">
-  <h1>Page not found</h1>
-  <p class="lede">
-    Nothing is published at this address. A package's page goes away when the package leaves npm or
-    drops the <code>standardagent</code> keyword.
-  </p>
-  <a class="back" href="/">← All agents</a>
+  <div class="empty">
+    <p><strong>Page not found</strong></p>
+    <p>
+      Nothing is published at this address. A package's page goes away when the package leaves
+      npm or drops the <code>standardagent</code> keyword.
+    </p>
+    <p><a href="/">Back to all agents</a></p>
+  </div>
 </Base>
