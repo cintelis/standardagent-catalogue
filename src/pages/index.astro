@@ -2,20 +2,28 @@
 import Filter from '../components/Filter.astro';
 import PackageCard from '../components/PackageCard.astro';
 import Base from '../layouts/Base.astro';
-import { getCatalogue } from '../lib/npm';
+import { formatDate, getCatalogue } from '../lib/npm';
 
-const { agents } = await getCatalogue();
+const { agents, ecosystem, fetchedAt } = await getCatalogue();
 ---
 
 <Base
   title="Agents"
   description="An open index of Standard Agent packages published on npm."
 >
-  <h1>Agents</h1>
+  <p class="eyebrow">An open index, rebuilt from npm</p>
+  <h1>Agents you can <span class="grad">install</span></h1>
   <p class="lede">
     Packed Standard Agents published on npm. Each one installs with a package manager and runs in
     any runtime that implements the specification.
   </p>
+  <ul class="stats">
+    <li><strong>{agents.length}</strong> agent package{agents.length === 1 ? '' : 's'}</li>
+    <li>
+      <strong>{ecosystem.length}</strong> ecosystem package{ecosystem.length === 1 ? '' : 's'}
+    </li>
+    <li>Read from npm on <strong>{formatDate(fetchedAt)}</strong></li>
+  </ul>
 
   {
     agents.length > 0 ? (
