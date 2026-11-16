@@ -1,0 +1,32 @@
+---
+/** A small line drawing for a tab or a link. Each is drawn for this site. */
+interface Props {
+  name: 'agents' | 'ecosystem' | 'runtimes' | 'publish' | 'code' | 'data';
+}
+
+const { name } = Astro.props;
+---
+
+<svg
+  class="icon"
+  viewBox="0 0 16 16"
+  width="16"
+  height="16"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {name === 'agents' && <path d="M2 5l6-3 6 3v6l-6 3-6-3z M2 5l6 3 6-3 M8 8v6" />}
+  {
+    name === 'ecosystem' && (
+      <path d="M2.5 2.5h4v4h-4z M9.5 2.5h4v4h-4z M2.5 9.5h4v4h-4z M9.5 9.5h4v4h-4z" />
+    )
+  }
+  {name === 'runtimes' && <path d="M3.5 2.5h9a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z M6.5 5.5l4 2.5-4 2.5z" />}
+  {name === 'publish' && <path d="M8 10.5v-8 M4.5 6L8 2.5 11.5 6 M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" />}
+  {name === 'code' && <path d="M5.5 4.5L2 8l3.5 3.5 M10.5 4.5L14 8l-3.5 3.5" />}
+  {name === 'data' && <path d="M4 1.5h5l3 3v10H4z M9 1.5v3h3 M6 8.5h4 M6 11h4" />}
+</svg>

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Icon from '../components/Icon.astro';
 import { formatDate, getCatalogue } from '../lib/npm';
 
 interface Props {
@@ -14,12 +15,18 @@ const description = Astro.props.description.replace(/[<>]/g, '');
 const { agents, ecosystem, fetchedAt } = await getCatalogue();
 
 // A tab with a count shows it in a small pill, as a code-hosting site does.
-const nav: { href: string; label: string; count?: number }[] = [
-  { href: '/', label: 'Agents', count: agents.length },
-  { href: '/ecosystem/', label: 'Ecosystem', count: ecosystem.length },
-  { href: '/runtimes/', label: 'Runtimes' },
-  { href: '/publish/', label: 'Publish' },
+const nav: {
+  href: string;
+  label: string;
+  icon: 'agents' | 'ecosystem' | 'runtimes' | 'publish';
+  count?: number;
+}[] = [
+  { href: '/', label: 'Agents', icon: 'agents', count: agents.length },
+  { href: '/ecosystem/', label: 'Ecosystem', icon: 'ecosystem', count: ecosystem.length },
+  { href: '/runtimes/', label: 'Runtimes', icon: 'runtimes' },
+  { href: '/publish/', label: 'Publish', icon: 'publish' },
 ];
+const source = 'https://github.com/cintelis/standardagent-catalogue';
 const path = Astro.url.pathname;
 const isCurrent = (href: string) =>
   href === '/' ? path === '/' || path.startsWith('/package/') : path.startsWith(href);
@@ -39,14 +46,28 @@ const isCurrent = (href: string) =>
     <header class="site-header">
       <div class="wrap">
         <div class="brand-row">
-          <a class="brand" href="/">Standard Agent Catalogue</a>
+          <a class="brand" href="/">
+            <!-- The logo in public/favicon.svg. It is drawn here, not loaded as an
+                 image, so that it takes the colour of the text around it. -->
+            <svg class="brand-mark" viewBox="0 0 128 128" aria-hidden="true">
+              <path fill="currentColor" d="M50.4 78.5a75.1 75.1 0 0 0-28.5 6.9l24.2-65.7c.7-2 1.9-3.2 3.4-3.2h29c1.5 0 2.7 1.2 3.4 3.2l24.2 65.7s-11.6-7-28.5-7L67 45.5c-.4-1.7-1.6-2.8-2.9-2.8-1.3 0-2.5 1.1-2.9 2.7L50.4 78.5Zm-1.1 28.2Zm-4.2-20.2c-2 6.6-.6 15.8 4.2 20.2a17.5 17.5 0 0 1 .2-.7 5.5 5.5 0 0 1 5.7-4.5c2.8.1 4.3 1.5 4.7 4.7.2 1.1.2 2.3.2 3.5v.4c0 2.7.7 5.2 2.2 7.4a13 13 0 0 0 5.7 4.9v-.3l-.2-.3c-1.8-5.6-.5-9.5 4.4-12.8l1.5-1a73 73 0 0 0 3.2-2.2 16 16 0 0 0 6.8-11.4c.3-2 .1-4-.6-6l-.8.6-1.6 1a37 37 0 0 1-22.4 2.7c-5-.7-9.7-2-13.2-6.2Z" />
+            </svg>
+            Standard Agent Catalogue
+          </a>
           <span class="label">Open index</span>
+          <span class="header-links">
+            <a class="btn" href="/catalogue.json"><Icon name="data" /> JSON</a>
+            <a class="btn" href={source} rel="noopener noreferrer"><Icon name="code" /> Source</a>
+          </span>
         </div>
         <nav class="site-nav" aria-label="Main">
           {
             nav.map((item) => (
               <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                <span>{item.label}</span>
+                <span>
+                  <Icon name={item.icon} />
+                  {item.label}
+                </span>
                 {item.count !== undefined && <span class="counter">{item.count}</span>}
               </a>
             ))
@@ -69,7 +90,19 @@ const isCurrent = (href: string) =>
           package conforms to the specification. Agent packages contain executable code, so read
           one before you install it.
         </p>
-        <p><a href="/catalogue.json">Catalogue as JSON</a></p>
+        <ul class="footer-links">
+          <li><a href="/catalogue.json">Catalogue as JSON</a></li>
+          <li><a href="/publish/">Publish an agent</a></li>
+          <li>
+            <a href="https://standardagentspec.org" rel="noopener noreferrer">Specification</a>
+          </li>
+          <li><a href={source} rel="noopener noreferrer">Source on GitHub</a></li>
+          <li>
+            <a href={`${source}/blob/main/CONTRIBUTING.md`} rel="noopener noreferrer">
+              Contribute
+            </a>
+          </li>
+        </ul>
       </div>
     </footer>
   </body>

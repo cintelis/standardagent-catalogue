@@ -1,0 +1,20 @@
+---
+import { identicon } from '../lib/identicon';
+
+interface Props {
+  /** The package name the picture is made from. */
+  name: string;
+  /** Adds a class, such as `avatar-large`. */
+  class?: string;
+}
+
+const { name, class: extra } = Astro.props;
+const { cells, hue } = identicon(name);
+// A colour that reads on a light and on a dark background. It is an
+// attribute, not a style, so the Content-Security-Policy allows it.
+const fill = `hsl(${hue} 55% 52%)`;
+---
+
+<svg class:list={['avatar', extra]} viewBox="0 0 7 7" aria-hidden="true" shape-rendering="crispEdges">
+  {cells.map(([x, y]) => <rect x={x + 1} y={y + 1} width="1" height="1" fill={fill} />)}
+</svg>
