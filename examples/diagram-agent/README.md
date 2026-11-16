@@ -1,195 +1,130 @@
-# Diagram Designer: a Standard Agent that draws draw.io diagrams
+# Diagram Designer
 
-An agent that designs draw.io diagrams. You describe a system, a process, or a
-schema. The agent writes a diagram spec, builds it, reads the layout problems
-the checker reports, fixes them, and hands back a `.drawio.svg` file: an SVG
-that shows as a picture and opens in draw.io as the diagram.
-
-It is the second sample in this repository. Read
-[`../text-coach-agent`](../text-coach-agent) first: it shows the same structure
-with a much smaller Rust crate.
-
-- **TypeScript** defines the agent, its prompt, its model, and its two tools, in
-  the shape the [Standard Agent Specification](https://standardagentspec.org)
-  asks for.
-- **Rust** is the diagram engine: it validates the spec, lays out the page,
-  writes the draw.io XML, checks it, and draws the SVG. It compiles to
-  WebAssembly, and the TypeScript tools call it.
-
-It is published to npm as
-[`@cintelisai/diagram-agent`](https://www.npmjs.com/package/@cintelisai/diagram-agent):
+A [Standard Agent](https://standardagentspec.org) that designs draw.io
+diagrams. You describe a system, a process, or a schema. The agent writes a
+diagram spec, builds it, reads the layout problems that its checker reports,
+fixes them, and hands back a `.drawio.svg` file: an SVG that shows as a picture
+and opens in draw.io as the diagram.
 
 ```bash
 npm install @cintelisai/diagram-agent
 ```
 
+The agent's definitions are TypeScript. The diagram engine is Rust, compiled to
+WebAssembly and shipped inside the package, so there is nothing else to install
+and nothing to run beside it.
+
 It is an early release. The tools are tested, on Node and on the Cloudflare
 Workers runtime, but nobody has yet run a full conversation through a hosted
-runtime: see "What the sample does not do".
+runtime: see [What it does not do](#what-it-does-not-do).
 
-Each release is built by this repository's release workflow and signed with
-the Cintelis release key before it reaches npm. To check one, from the root of
-this repository:
+## What is in the package
 
-```bash
-scripts/verify-release.sh diagram-agent-v0.1.0
-npm audit signatures        # In a project that has installed the package
+| Kind | Name | What it is |
+|---|---|---|
+| Agent | `diagram_designer` | The entry agent. A model on one side, the person who asks on the other. Another agent can call it as a tool |
+| Prompt | `diagram_designer` | The design rules, and the build, check, and fix workflow |
+| Model | `designer_model` | Claude, through `@standardagents/anthropic`. The runtime supplies the API key |
+| Tool | `spec_reference` | Returns the spec format, the kinds of shape, and the colours. The model reads it once |
+| Tool | `create_diagram` | Builds a diagram from a spec. Returns a check report and attaches the SVG |
+
+## Use it
+
+Install the package in a project whose runtime implements the Standard Agent
+Specification. The runtime finds the entry agent from the `standardagent`
+field in the package's `package.json`, and it needs an API key for the model
+provider.
+
+The package exports one registry for each kind of definition, and each entry
+is a function that loads one. That makes the tools easy to try with no runtime,
+no model, and no API key:
+
+```js
+import * as diagrams from '@cintelisai/diagram-agent';
+
+const tool = await diagrams.tools.create_diagram();
+const args = tool.args.parse({
+  name: 'order-flow',
+  title: 'Order flow',
+  layout: 'auto',
+  nodes: [
+    { id: 'shop', label: 'Shopper', kind: 'actor' },
+    { id: 'api', label: 'Orders API', kind: 'service' },
+    { id: 'db', label: 'Postgres', kind: 'datastore' },
+  ],
+  edges: [
+    { from: 'shop', to: 'api', label: 'POST /orders' },
+    { from: 'api', to: 'db', label: 'insert', style: 'data' },
+  ],
+});
+
+const result = await tool.execute({}, args);
+const { file, check } = JSON.parse(result.result);
+console.log(file, check.errors, check.warnings);
+// 491ef5ed-order-flow.drawio.svg 0 0
+
+// The picture: an SVG, as base64.
+const svg = Buffer.from(result.attachments[0].data, 'base64').toString('utf8');
 ```
 
-## Why a diagram builder suits an agent
+## A diagram spec
 
-The engine is a port of drawgen, a Python package that builds draw.io diagrams.
-drawgen is not public, and this sample does not need it to build or to run.
+A spec is data. The model writes one, and so can you.
 
-drawgen already works as a loop: write a spec, build it, read the check report,
-fix, build again. That loop is
-what an agent does, and every step between the spec and the SVG is a pure
-calculation. The model makes the design decisions, and code does the geometry.
-
-A packed Standard Agent is an npm package of JavaScript, so it cannot run the
-Python package or start a desktop program. This sample ports the part that is a
-pure calculation and leaves out the part that needs a computer:
-
-| drawgen | In this agent |
+| Field | What it holds |
 |---|---|
-| Spec format, kinds, zones, edge styles | Ported: `rust/src/theme.rs`, `rust/src/spec.rs` |
-| Auto layout | Ported: `rust/src/spec.rs` |
-| draw.io XML builder | Ported: `rust/src/diagram.rs` |
-| Checker | Ported: `rust/src/check.rs` |
-| Built-in SVG renderer, with the diagram embedded | Ported: `rust/src/render.rs` |
-| YAML specs | Left out. A tool call carries JSON |
-| draw.io Desktop rendering, PNG and PDF export, previews | Left out. They need a desktop program |
-| Writing files, markdown documents, the Claude Code hook | Left out. The tool returns the SVG as an attachment |
-| Reading and updating an existing `.drawio` file | Left out. See "What the sample does not do" |
+| `title`, `subtitle` | The heading of the page |
+| `layout`, `direction` | `"auto"` places the nodes that have no `x` and `y`, flowing `right` or `down` |
+| `nodes` | Components: `id`, `label`, `kind`, and optionally `sub`, `zone`, `x`, `y`, `w`, `h` |
+| `zones` | Tinted, titled containers that group nodes |
+| `entities` | Entity-relationship tables, with a list of fields |
+| `edges` | Connections: `from`, `to`, and optionally `label`, `style`, `exit`, `entry`, `points` |
+| `texts` | Free text on the page |
+| `legend` | `true` adds a legend |
 
-## Run it
+A node's `kind` picks its shape and colour: `actor`, `external`, `service`,
+`ai`, `worker`, `datastore`, `queue`, `ui`, `gov`, `security`, `decision`,
+`step`, `terminal`, or `note`. An edge's `style` is `sync`, `async`, `data`,
+`ai`, or `weak`. A zone's colour is `blue`, `green`, `purple`, `amber`, `grey`,
+`red`, or `teal`.
 
-You need Node 22 or later, pnpm, and Rust from rustup. `rust-toolchain.toml`
-asks for the stable toolchain with the WebAssembly target, and rustup adds the
-target on first use.
+One call takes up to 200 nodes, 400 edges, 40 zones, 60 entities, and 60 texts.
+The `spec_reference` tool returns the full format.
 
-```bash
-pnpm install
-pnpm test       # Builds, runs the Rust tests, then tests the built package
-pnpm typecheck  # Checks the TypeScript without writing dist/
-pnpm demo       # Builds the order-flow example and writes out/<name>.drawio.svg
-pnpm demo test/fixtures/specs/05-problems.json   # A spec with layout problems
-```
-
-`pnpm demo` needs no model and no API key. It calls the `create_diagram` tool
-directly, prints the check report, and saves the picture. Open the file in a
-browser to look at it, or in draw.io to edit it.
-
-## How a request travels
-
-```text
-requester ──▶ agent (diagram_designer)      src/agents/diagram_designer.ts
-                │  side A is a prompt, side B is the requester
-                ▼
-              prompt (diagram_designer)     src/prompts/diagram_designer.ts
-                │  the design rules, and the build-check-fix workflow
-                │
-                ├─▶ tool spec_reference     src/tools/spec_reference.ts
-                │     the spec format and the kinds, read once
-                │
-                └─▶ tool create_diagram     src/tools/create_diagram.ts
-                      │  validates the arguments, then calls
-                      ▼
-                    createDiagram()         src/wasm.ts
-                      │  one JSON request into WebAssembly memory
-                      ▼
-                    handle()                rust/src/lib.rs
-                      │  spec ─▶ diagram ─▶ check ─▶ render
-                      ▼
-                    check report (text) + NAME.drawio.svg (attachment)
-                      │
-                      ▼
-              the model reads the report, fixes the spec, and calls again
-```
-
-## Read it in this order
-
-1. **`test/fixtures/specs/01-order-flow.json`**. A spec is data: components by
-   kind, zones, labelled edges.
-2. **`rust/src/lib.rs`**. `create` is the whole pipeline in four lines, and
-   `handle` wraps it in JSON. The `ffi` module is the WebAssembly boundary.
-3. **`rust/src/spec.rs`**, then **`diagram.rs`**, **`check.rs`**, and
-   **`render.rs`**. Each starts with a comment that says what it does.
-4. **`src/wasm.ts`**. The TypeScript side of the boundary. It gets the module
-   from one of two loaders: see "Where it runs".
-5. **`src/tools/create_diagram.ts`**. The argument schema is what the model
-   sees. The result has two parts: the report as text and the SVG as an
-   attachment.
-6. **`src/prompts/diagram_designer.ts`**. The workflow and the design rules.
-7. **`src/index.ts`** and **`package.json`**. What the package exports and
-   declares.
-
-## How it stays true to drawgen
-
-The Rust code must give the same output as the Python package. The tests prove
-it for every spec in `test/fixtures/specs`:
-
-- `scripts/golden.py` runs the Python `drawgen` package over the specs and
-  writes `test/fixtures/expected`: the draw.io XML, the check report, and the
-  SVG for a spec that builds, or the error message for one that does not.
-- `cargo test` compares the Rust output with those files, byte for byte.
-- `pnpm test` makes the same comparison through the built WebAssembly module.
-
-When drawgen changes, run the script again and port the change until the
-tests pass:
-
-```bash
-/path/to/python-with-drawgen scripts/golden.py
-pnpm test
-```
-
-The expected files were written by drawgen 0.2.0. They hold only the diagrams
-made from the specs in `test/fixtures/specs`.
-
-The port differs from the original in three ways, and none changes the output
-for the specs in `test/fixtures/specs`:
-
-- Where Python would stop with an internal error, such as a coordinate that is
-  a string, the Rust code reports a spec problem that names the entry.
-- Edge waypoints count as content. drawgen sizes the page and the picture to
-  the shapes alone, so an edge routed around the shapes could run off both
-  without a word from the checker. Here a fitted page grows to hold the
-  waypoints, the picture covers them, and the checker reports a waypoint that
-  is off a page whose size the spec sets.
-- A text colour must be a hex colour, a text alignment must be `left`,
-  `center` or `right`, and an edge arrow must be a name made of letters.
-  drawgen copies these three values into a draw.io style as they are.
+The check report lists what is wrong with the layout, such as two shapes that
+overlap, a shape or an edge off the page, an edge that crosses a shape, or a
+label too long for its shape. Each issue names the shape, so that the model, or
+you, can move it and build again.
 
 ## Where it runs
 
 The package carries the WebAssembly module in two forms, and `package.json`
 picks one:
 
-| Where | Loader | How the module arrives |
-|---|---|---|
-| Node, Deno, Bun, browsers | `src/wasm-module.ts` | As base64 inside the JavaScript, compiled on first use |
-| Cloudflare Workers | `src/wasm-module.workerd.ts` | As `dist/drawgen_core.wasm`, imported as a module |
+| Where | How the module arrives |
+|---|---|
+| Node, Deno, Bun, browsers | As base64 inside the JavaScript, compiled on first use |
+| Cloudflare Workers | As a `.wasm` file in the package, imported as a module |
 
 A Worker may not compile a module from bytes at run time, so it needs the
-file. `src/wasm.ts` imports `#wasm-module`, and the `imports` field in
-`package.json` maps that name to the Workers loader under the `workerd`
-condition, which Wrangler sets when it bundles. The base64 copy then stays out
-of the Worker.
+file. The package picks the right form by itself: its `package.json` maps the
+loader to the Workers one under the `workerd` condition, which Wrangler sets
+when it bundles. The base64 copy then stays out of the Worker.
 
-This was checked by hand, not in CI: a Worker that imports the built package
-was bundled with Wrangler 4 and run in its local runtime, and the `create_diagram` tool
+This was checked by hand: a Worker that imports the built package was bundled
+with Wrangler 4 and run in its local runtime, and the `create_diagram` tool
 returned the same result as on Node. The Worker needs the `nodejs_compat`
 compatibility flag, because the model provider package imports Node modules.
 
 Another bundler, or a runtime with the same rule under another condition
 name, can import the file directly: the package exports it as
-`<package name>/drawgen_core.wasm`.
+`@cintelisai/diagram-agent/drawgen_core.wasm`.
 
-## What the sample does not do
+## What it does not do
 
-- **It has not run on a hosted runtime.** The tests load the package, check
-  every definition, and run both tools. A full conversation needs a runtime
-  that implements the specification, and an API key for the model provider.
+- **It has not run on a hosted runtime.** Its tests load the package, check
+  every definition, and run both tools. Nobody has yet run a full conversation
+  through a runtime.
 - **It cannot read or change an existing diagram.** The tools build from a
   spec. To change a diagram, the model changes the spec and builds again. To
   edit a `.drawio` file that the agent did not make, it would need an XML
@@ -198,14 +133,13 @@ name, can import the file directly: the package exports it as
   emits closely enough to read. draw.io redraws the file exactly the next time
   someone saves it there. Two checks are estimates for the same reason: where
   an edge runs, and how wide a label is.
-- **One page for each call.** The Rust code builds several pages from a
-  `pages` list, and the tests cover it. The `create_diagram` tool takes one
-  page, to keep its argument schema small.
+- **One page for each call.** The `create_diagram` tool takes one page, to
+  keep its argument schema small.
 
-## Safety notes
+## Safety
 
 - The argument schema bounds every value: the number of nodes and edges, the
-  length of each label, and the range of each coordinate. `src/wasm.ts` also
+  length of each label, and the range of each coordinate. The package also
   refuses a request over 1,000,000 bytes before any memory is allocated.
 - The argument schema drops a key it does not name. The specification limits
   a tool's arguments to a fixed set of Zod types, and a strict object is not
@@ -230,6 +164,27 @@ name, can import the file directly: the package exports it as
   and hyphens, so a name cannot contain a path.
 - The prompt tells the model to treat a description as material to draw, not
   as instructions.
-- The Rust crate has one dependency, `serde_json`, and `Cargo.lock` pins it.
-  The npm packages are pinned as in the Text Coach sample: see the note about
-  `pnpm-workspace.yaml` there.
+- The Rust code has one dependency, `serde_json`, pinned by a lock file. The
+  package's own dependencies are pinned by a lock file too.
+
+## Check a release
+
+Each release is built by the release workflow of
+[its repository](https://github.com/cintelis/standardagent-catalogue) and signed with the Cintelis release key before it
+reaches npm. To check one, from a copy of that repository:
+
+```bash
+scripts/verify-release.sh diagram-agent-v0.1.1
+```
+
+In a project that has installed the package, `npm audit signatures` checks its
+npm provenance.
+
+## Source
+
+The source is in
+[`examples/diagram-agent`](https://github.com/cintelis/standardagent-catalogue/tree/main/examples/diagram-agent) of the Standard Agent Catalogue repository,
+under the MIT licence. [DEVELOPMENT.md](https://github.com/cintelis/standardagent-catalogue/blob/main/examples/diagram-agent/DEVELOPMENT.md) there says how
+the code is laid out, how to build and test it, and how the Rust engine is kept
+correct. Changes are welcome: see
+[CONTRIBUTING.md](https://github.com/cintelis/standardagent-catalogue/blob/main/CONTRIBUTING.md).
