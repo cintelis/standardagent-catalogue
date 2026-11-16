@@ -157,6 +157,10 @@ a spec problem that names the entry.
 - The argument schema bounds every value: the number of nodes and edges, the
   length of each label, and the range of each coordinate. `src/wasm.ts` also
   refuses a request over 1,000,000 bytes before any memory is allocated.
+- The tool lists at most 40 issues from the check report, errors first, and
+  counts the rest by code. A crowded page can make the checker report thousands
+  of overlaps, and the model needs the first few, not all of them. The attached
+  SVG has no size limit of its own.
 - The WebAssembly module imports nothing. It cannot reach the network, the
   file system, or a clock.
 - Every piece of text from a spec is escaped before it goes into the XML or

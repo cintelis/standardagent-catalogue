@@ -1,6 +1,6 @@
 import { defineTool } from '@standardagents/spec';
 import { z } from 'zod';
-import { createDiagram, DiagramSpecError } from '../wasm.js';
+import { createDiagram, DiagramSpecError, type CheckReport } from '../wasm.js';
 
 /** The names the theme defines. A test checks them against the Rust code. */
 export const KINDS = [
@@ -140,6 +140,51 @@ function toBase64(text: string): string {
   return btoa(binary);
 }
 
+/** The most issues one result lists. The counts always cover every issue. */
+export const MAX_REPORTED_ISSUES = 40;
+/** The longest issue message one result carries, in characters. */
+const MAX_ISSUE_MESSAGE = 300;
+
+/**
+ * Shortens a check report so that it stays a size the model can read.
+ *
+ * The checker reports one issue for each pair of overlapping shapes and for
+ * each shape an edge crosses, so a crowded page can produce thousands. The
+ * model needs the first few to start fixing, not megabytes of them. This
+ * keeps the errors first, then the warnings, up to MAX_REPORTED_ISSUES, and
+ * counts the rest by code. `errors` and `warnings` stay the full totals.
+ *
+ * It lives here and not in the Rust code, so that the Rust report stays the
+ * same as the one the Python package writes.
+ */
+export function limitReport(check: CheckReport) {
+  const ordered = [
+    ...check.issues.filter((issue) => issue.severity === 'error'),
+    ...check.issues.filter((issue) => issue.severity !== 'error'),
+  ];
+  const issues = ordered.slice(0, MAX_REPORTED_ISSUES).map((issue) =>
+    issue.message.length > MAX_ISSUE_MESSAGE
+      ? { ...issue, message: `${issue.message.slice(0, MAX_ISSUE_MESSAGE - 1)}…` }
+      : issue,
+  );
+  const rest = ordered.slice(MAX_REPORTED_ISSUES);
+  if (rest.length === 0) return { ...check, issues };
+
+  const byCode: Record<string, number> = {};
+  for (const issue of rest) byCode[issue.code] = (byCode[issue.code] ?? 0) + 1;
+  return {
+    ...check,
+    issues,
+    omitted: {
+      count: rest.length,
+      by_code: byCode,
+      note:
+        `Only the first ${issues.length} of ${ordered.length} issues are listed, errors first. ` +
+        'Fix them and build again to see the rest.',
+    },
+  };
+}
+
 /**
  * Builds a diagram from a spec, checks it, and renders it.
  *
@@ -165,7 +210,7 @@ export default defineTool({
         status: 'success',
         result: JSON.stringify({
           file,
-          check: { ...created.check, path: file },
+          check: limitReport({ ...created.check, path: file }),
           note:
             'Drawn by the built-in renderer: approximate, and still editable. ' +
             'draw.io redraws it exactly the next time someone saves it there.',

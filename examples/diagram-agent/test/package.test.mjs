@@ -7,7 +7,13 @@ import { test } from 'node:test';
 import { validateAgentDefinition } from '@standardagents/spec';
 
 import * as pkg from '../dist/index.js';
-import { EDGE_STYLES, KINDS, ZONE_COLOURS, slugify } from '../dist/tools/create_diagram.js';
+import {
+  EDGE_STYLES,
+  KINDS,
+  MAX_REPORTED_ISSUES,
+  ZONE_COLOURS,
+  slugify,
+} from '../dist/tools/create_diagram.js';
 import { createDiagram, DiagramSpecError, MAX_REQUEST_BYTES, specReference } from '../dist/wasm.js';
 
 const fixtures = new URL('./fixtures/', import.meta.url);
@@ -129,6 +135,36 @@ test('the create_diagram tool returns a check report and attaches the SVG', asyn
   assert.equal(JSON.parse(again.result).file, report.file);
   const changed = await tool.execute({}, tool.args.parse({ ...orderFlow, subtitle: 'Changed' }));
   assert.notEqual(JSON.parse(changed.result).file, report.file);
+});
+
+test('the create_diagram tool keeps a long check report short', async () => {
+  const tool = await pkg.tools.create_diagram();
+  // The most nodes the schema allows, all in one place: every pair overlaps.
+  const nodes = Array.from({ length: 200 }, (_, i) => ({ id: `n${i}`, label: 'N', x: 100, y: 100 }));
+  const spec = { title: 'Crowded', nodes, edges: [{ from: 'n0', to: 'n1', label: 'x'.repeat(200) }] };
+  const full = createDiagram(spec, 'crowded').check;
+  assert.ok(full.issues.length > 10_000, 'the checker itself reports every pair');
+
+  const result = await tool.execute({}, tool.args.parse({ name: 'crowded', ...spec }));
+  assert.equal(result.status, 'success');
+  assert.ok(result.result.length < 20_000, `the result is ${result.result.length} characters`);
+
+  const { check } = JSON.parse(result.result);
+  // The counts still cover every issue.
+  assert.equal(check.errors, full.errors);
+  assert.equal(check.warnings, full.warnings);
+  assert.equal(check.issues.length, MAX_REPORTED_ISSUES);
+  if (full.errors >= MAX_REPORTED_ISSUES) {
+    assert.ok(check.issues.every((issue) => issue.severity === 'error'), 'errors come first');
+  }
+  assert.equal(check.omitted.count, full.issues.length - MAX_REPORTED_ISSUES);
+  const counted = Object.values(check.omitted.by_code).reduce((sum, n) => sum + n, 0);
+  assert.equal(counted, check.omitted.count);
+  assert.match(check.omitted.note, /build again/);
+
+  // A short report is passed through whole.
+  const clean = await tool.execute({}, tool.args.parse(orderFlow));
+  assert.equal(JSON.parse(clean.result).check.omitted, undefined);
 });
 
 test('the create_diagram tool reports a bad spec as an error the model can fix', async () => {
