@@ -4,13 +4,15 @@
  * Everything the registry returns is written by package publishers, so it is
  * untrusted. This module is the only place that touches that data: it checks
  * each field's type, caps its length, and keeps only http(s) links. Pages
- * render the result as text and never as HTML.
+ * render the result as text and never as HTML. A README goes through
+ * `readme.ts`, which keeps its headings, lists, and links and drops any HTML.
  *
  * Set CATALOGUE_FIXTURES to a folder to read saved responses instead of the
  * network. The tests use it.
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { parseReadme, type Readme } from './readme';
 
 const REGISTRY = 'https://registry.npmjs.org';
 const HEADERS = {
@@ -55,6 +57,8 @@ export interface AgentPackage extends CataloguePackage {
   effects: string[];
   threadEndpoints: string[];
   parentHooks: { agent: string; hooks: ParentHook[] }[];
+  /** The package's README, read into a tree that is safe to draw, or null. */
+  readme: Readme | null;
 }
 
 export interface EcosystemPackage extends CataloguePackage {
@@ -191,6 +195,29 @@ async function latestManifest(name: string): Promise<Json | null> {
   return isRecord(manifest) ? manifest : null;
 }
 
+/**
+ * The README of a package's latest version. The registry keeps it in the
+ * package's full record, not in the record of one version.
+ *
+ * A README is an extra, so a failure to read one is reported and the package
+ * is listed without it.
+ */
+async function latestReadme(name: string): Promise<Readme | null> {
+  try {
+    if (process.env.CATALOGUE_FIXTURES) {
+      const saved = await readFixture('manifests.json');
+      const manifest = isRecord(saved) ? saved[name] : null;
+      return isRecord(manifest) ? parseReadme(manifest.readme) : null;
+    }
+    const path = encodeURIComponent(name).replace(/^%40/, '@');
+    const record = await fetchJson(`${REGISTRY}/${path}`);
+    return isRecord(record) ? parseReadme(record.readme) : null;
+  } catch (error) {
+    console.warn(`[catalogue] Could not read the README of ${name}: ${String(error)}`);
+    return null;
+  }
+}
+
 async function mapPool<T, R>(items: T[], worker: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let next = 0;
@@ -266,6 +293,7 @@ async function load(): Promise<Catalogue> {
       }
       agents.push({
         ...base,
+        readme: await latestReadme(name),
         entryAgents,
         effects: textList(field.effects, 100),
         threadEndpoints: textList(field.threadEndpoints, 200),

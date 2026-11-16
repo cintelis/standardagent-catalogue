@@ -1,5 +1,6 @@
 ---
 import Identicon from '../../components/Identicon.astro';
+import Readme from '../../components/Readme.astro';
 import Base from '../../layouts/Base.astro';
 import { formatCount, formatDate, getCatalogue, type AgentPackage } from '../../lib/npm';
 
@@ -108,6 +109,31 @@ const external = 'noopener noreferrer nofollow';
                 ))}
               </ul>
             </div>
+          </section>
+        )
+      }
+
+      {
+        pkg.readme && (
+          <section class="box">
+            <h2 class="box-header">README</h2>
+            <div class="box-body markdown">
+              <Readme blocks={pkg.readme.blocks} />
+              {
+                pkg.readme.truncated && (
+                  <p class="markdown-more">
+                    The README is longer than this page shows.{' '}
+                    <a href={pkg.links.npm} rel={external}>
+                      Read the rest on npm
+                    </a>
+                    .
+                  </p>
+                )
+              }
+            </div>
+            <p class="box-footer">
+              Written by the package's publisher. Pictures and HTML in it are left out.
+            </p>
           </section>
         )
       }

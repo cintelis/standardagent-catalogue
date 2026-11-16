@@ -438,6 +438,137 @@ h2 {
   margin-bottom: 0;
 }
 
+.box-footer {
+  margin: 0;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border-muted);
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--canvas-subtle);
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+/* A package's README, drawn by src/components/Readme.astro. */
+.markdown {
+  padding: 24px 32px;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  margin: 24px 0 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* A README's first two levels of heading have a line under them. */
+.markdown h3 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-muted);
+  font-size: 1.5em;
+}
+
+.markdown h4 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-muted);
+  font-size: 1.25em;
+}
+
+.markdown h5 {
+  font-size: 1.05em;
+}
+
+.markdown h6 {
+  font-size: 1em;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown pre,
+.markdown .table-scroll {
+  margin: 0 0 16px;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 2em;
+}
+
+.markdown li + li {
+  margin-top: 4px;
+}
+
+.markdown li > ul,
+.markdown li > ol {
+  margin: 4px 0 0;
+}
+
+.markdown blockquote {
+  padding: 0 1em;
+  border-left: 4px solid var(--border);
+  color: var(--fg-muted);
+}
+
+.markdown code {
+  font-size: 85%;
+}
+
+.markdown pre {
+  font-size: 14px;
+}
+
+.markdown pre code {
+  font-size: inherit;
+}
+
+.markdown hr {
+  height: 4px;
+  margin: 24px 0;
+  border: 0;
+  background: var(--border-muted);
+}
+
+/* A wide table scrolls sideways inside the box, not the whole page. */
+.markdown .table-scroll {
+  overflow-x: auto;
+}
+
+.markdown table {
+  border-collapse: collapse;
+  font-size: 14px;
+  /* A cell keeps its words whole. A table that is too wide scrolls. */
+  overflow-wrap: normal;
+}
+
+.markdown table code {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.markdown th,
+.markdown td {
+  padding: 6px 13px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown th {
+  background: var(--canvas-subtle);
+  font-weight: 600;
+}
+
+.markdown-more {
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
 /* A list of packages: one row each, with a line between rows. */
 .cards {
   margin: 0;
@@ -695,5 +826,9 @@ pre code {
 @media (max-width: 768px) {
   .columns {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .markdown {
+    padding: 16px;
   }
 }
