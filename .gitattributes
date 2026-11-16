@@ -1,3 +1,7 @@
 # The diagram tests compare these files byte for byte, so Git must not change
 # their line endings on checkout.
 examples/diagram-agent/test/fixtures/** -text
+
+# Shell scripts and the release key are read by tools that need Unix line endings.
+*.sh text eol=lf
+scripts/release_key.pub text eol=lf

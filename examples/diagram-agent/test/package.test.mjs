@@ -303,6 +303,9 @@ test('the manifest carries what the catalogue looks for', () => {
   // The same two markers that src/lib/npm.ts in this repository requires.
   assert.ok(manifest.keywords.includes('standardagent'));
   assert.ok(manifest.standardagent.entryAgents.length > 0);
-  assert.match(manifest.name, /^standardagent-/);
+  // A published package must not be private, and a scoped one is only public
+  // on npm when it says so.
+  assert.notEqual(manifest.private, true);
+  assert.equal(manifest.publishConfig.access, 'public');
   assert.ok(manifest.peerDependencies['@standardagents/spec']);
 });
