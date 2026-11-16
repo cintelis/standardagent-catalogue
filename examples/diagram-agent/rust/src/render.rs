@@ -47,14 +47,24 @@ pub fn render_svg(page: &Diagram, embed: Option<&str>) -> String {
     let by_id: HashMap<&str, &Vertex> = verts.iter().map(|v| (v.id.as_str(), v)).collect();
 
     let (pw, ph) = (page.width as f64, page.height as f64);
+    // The picture covers the shapes and the edge waypoints. drawgen measures
+    // the shapes only, which cuts off an edge routed outside them.
+    let waypoints = || {
+        page.cells.iter().flat_map(|cell| match &cell.shape {
+            Shape::Edge { points, .. } => points.as_slice(),
+            Shape::Vertex { .. } => &[],
+        })
+    };
     let max_x = verts
         .iter()
         .map(|v| v.x + v.w)
+        .chain(waypoints().map(|p| p.0))
         .reduce(f64::max)
         .unwrap_or(0.0);
     let max_y = verts
         .iter()
         .map(|v| v.y + v.h)
+        .chain(waypoints().map(|p| p.1))
         .reduce(f64::max)
         .unwrap_or(0.0);
     let or = |v: f64, default: f64| if v == 0.0 { default } else { v };

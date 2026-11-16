@@ -127,9 +127,16 @@ pnpm test
 The expected files were written by drawgen 0.2.0. They hold only the diagrams
 made from the specs in `test/fixtures/specs`.
 
-The port is stricter than the original in one way. Where Python would stop with
-an internal error, such as a coordinate that is a string, the Rust code reports
-a spec problem that names the entry.
+The port differs from the original in two ways, and neither changes the output
+for the specs in `test/fixtures/specs`:
+
+- Where Python would stop with an internal error, such as a coordinate that is
+  a string, the Rust code reports a spec problem that names the entry.
+- Edge waypoints count as content. drawgen sizes the page and the picture to
+  the shapes alone, so an edge routed around the shapes could run off both
+  without a word from the checker. Here a fitted page grows to hold the
+  waypoints, the picture covers them, and the checker reports a waypoint that
+  is off a page whose size the spec sets.
 
 ## What the sample does not do
 

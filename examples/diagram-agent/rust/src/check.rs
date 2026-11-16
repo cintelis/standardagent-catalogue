@@ -228,6 +228,30 @@ fn check_page(name: &str, page: &Diagram) -> Vec<Issue> {
                 );
             }
         }
+        // A waypoint off the page. drawgen does not check this. A page sized
+        // to its content always holds its waypoints, so this fires when the
+        // spec sets the page size or puts a waypoint at a negative coordinate.
+        for cell in &page.cells {
+            let Shape::Edge { points, .. } = &cell.shape else {
+                continue;
+            };
+            for &(x, y) in points {
+                if x < -0.5 || y < -0.5 || x > pw + 0.5 || y > ph + 0.5 {
+                    issue(
+                        "error",
+                        "out-of-page",
+                        &cell.id,
+                        format!(
+                            "waypoint ({},{}) is outside the {}x{} page",
+                            f0(x),
+                            f0(y),
+                            f0(pw),
+                            f0(ph)
+                        ),
+                    );
+                }
+            }
+        }
     }
 
     // Overlaps between solid shapes. A container holds things by design, text
