@@ -1,0 +1,123 @@
+---
+/**
+ * The picture behind the header: a shelf of packages with a few agents among
+ * them, in the shapes of the logo. Anime.js sends a ripple out from one agent
+ * at a time, as if it were calling on the packages around it.
+ *
+ * The picture is drawn here, at build time, so it shows without script. The
+ * script only moves it, and it leaves the picture still for a reader who has
+ * asked for reduced motion.
+ */
+const COLS = 44;
+const ROWS = 8;
+/** The distance from one shape to the next, and the size of a shape. */
+const PITCH = 24;
+const SIZE = 14;
+
+/** About one shape in ten is an agent. The choice is fixed, not random. */
+const isAgent = (col: number, row: number) =>
+  ((Math.imul(col + 1, 73856093) ^ Math.imul(row + 1, 19349663)) >>> 0) % 9 === 0;
+
+const cells = [];
+for (let row = 0; row < ROWS; row++) {
+  for (let col = 0; col < COLS; col++) {
+    cells.push({ col, row, agent: isAgent(col, row) });
+  }
+}
+const offset = (PITCH - SIZE) / 2;
+---
+
+<svg
+  class="header-art"
+  viewBox={`0 0 ${COLS * PITCH} ${ROWS * PITCH}`}
+  preserveAspectRatio="xMaxYMid slice"
+  aria-hidden="true"
+  data-header-art
+>
+  {
+    cells.map(({ col, row, agent }) =>
+      agent ? (
+        <circle
+          class="art-agent"
+          cx={col * PITCH + PITCH / 2}
+          cy={row * PITCH + PITCH / 2}
+          r={SIZE / 2}
+          data-col={col}
+          data-row={row}
+        />
+      ) : (
+        <rect
+          class="art-package"
+          x={col * PITCH + offset}
+          y={row * PITCH + offset}
+          width={SIZE}
+          height={SIZE}
+          rx="3.5"
+          data-col={col}
+          data-row={row}
+        />
+      ),
+    )
+  }
+</svg>
+
+<script>
+  import { animate, createTimeline, stagger, utils } from 'animejs';
+
+  const art = document.querySelector<SVGSVGElement>('[data-header-art]');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (art && !still) {
+    const agents = [...art.querySelectorAll<SVGElement>('.art-agent')];
+    const packages = [...art.querySelectorAll<SVGElement>('.art-package')];
+    const at = (el: SVGElement) => [Number(el.dataset.col), Number(el.dataset.row)] as const;
+
+    // Every agent breathes a little, each one out of step with the next.
+    animate(agents, {
+      scale: [1, 1.18],
+      duration: 1600,
+      ease: 'inOutSine',
+      alternate: true,
+      loop: true,
+      delay: stagger(140),
+    });
+
+    // One agent at a time calls out, and the packages near it answer in a
+    // ring that widens and fades.
+    const REACH = 9;
+    const ripple = () => {
+      const agent = utils.randomPick(agents);
+      const [col, row] = at(agent);
+      const near = packages
+        .map((el) => {
+          const [c, r] = at(el);
+          return { el, distance: Math.hypot(c - col, r - row) };
+        })
+        .filter(({ distance }) => distance <= REACH);
+      const distanceOf = new Map(near.map(({ el, distance }) => [el, distance]));
+
+      createTimeline({ onComplete: () => window.setTimeout(ripple, utils.random(900, 2200)) })
+        // Only the brightness changes here, so the breathing above goes on.
+        .add(agent, {
+          keyframes: [
+            { opacity: 1, duration: 220, ease: 'outQuad' },
+            { opacity: 0.6, duration: 900, ease: 'outQuad' },
+          ],
+        })
+        .add(
+          near.map(({ el }) => el),
+          {
+            keyframes: [
+              { scale: 1.28, opacity: 0.5, duration: 280, ease: 'outQuad' },
+              { scale: 1, opacity: 0.14, duration: 800, ease: 'inOutQuad' },
+            ],
+            // The farther a package is, the later and the weaker its answer.
+            delay: (el: SVGElement) => (distanceOf.get(el) ?? 0) * 55,
+          },
+          60,
+        );
+    };
+
+    window.setTimeout(ripple, 500);
+  }
+</script>

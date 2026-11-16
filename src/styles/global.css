@@ -33,6 +33,7 @@
   --btn-primary-bg: #1f883d;
   --btn-primary-hover-bg: #1c8139;
   --btn-primary-border: #1a7f37;
+  --brand-agent: #1f883d;
 
   --radius: 6px;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
@@ -61,6 +62,7 @@
     --btn-primary-bg: #238636;
     --btn-primary-hover-bg: #29903b;
     --btn-primary-border: #2ea043;
+    --brand-agent: #3fb950;
   }
 }
 
@@ -110,38 +112,88 @@ a:focus-visible,
 /* ------------------------------------------------------------------ header */
 
 .site-header {
+  position: relative;
+  overflow: hidden;
   border-bottom: 1px solid var(--border);
-  background: var(--canvas-subtle);
+  /* A faint green light from the top right, where the picture is. */
+  background:
+    radial-gradient(
+      44rem 18rem at 100% 0%,
+      color-mix(in srgb, var(--brand-agent) 14%, transparent),
+      transparent 70%
+    ),
+    var(--canvas-subtle);
 }
 
 .site-header .wrap {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 16px;
+  gap: 28px;
+  padding-top: 32px;
+}
+
+/* The picture behind the header. src/components/HeaderArt.astro draws it and
+   moves it. It fades out towards the left, so the name and the tabs stay easy
+   to read. */
+.header-art {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(100%, 1056px);
+  height: 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent 8%, #000 70%);
+  mask-image: linear-gradient(to right, transparent 8%, #000 70%);
+  pointer-events: none;
+}
+
+.art-package,
+.art-agent {
+  /* Each shape grows and shrinks about its own middle. */
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.art-package {
+  fill: var(--fg-muted);
+  opacity: 0.14;
+}
+
+.art-agent {
+  fill: var(--brand-agent);
+  opacity: 0.6;
 }
 
 .brand-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   color: var(--fg);
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-/* The logo, the same one as the favicon. */
+.brand:hover {
+  text-decoration: none;
+}
+
+/* The logo, the same one as the favicon: three packages and one agent. */
 .brand-mark {
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
+  fill: currentColor;
+}
+
+.brand-agent {
+  fill: var(--brand-agent);
 }
 
 /* A small outlined label, such as "Open index" or a version. */
