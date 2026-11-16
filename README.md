@@ -18,7 +18,7 @@ and it links back to npm.
 [![Hosting: Cloudflare](https://img.shields.io/badge/hosting-Cloudflare-0a7a58?style=flat-square&logo=cloudflare&logoColor=white)](#keeping-it-current)
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-0c1411?style=flat-square)](LICENSE)
 
-[**Open the live site**](https://agents.cintelis.ai) · [What's inside](#whats-inside) · [How it works](#how-it-works) · [Run it yourself](#commands) · [Sample agents](#sample-agents) · [Contribute](#contributing)
+[**Open the live site**](https://agents.cintelis.ai) · [What's inside](#whats-inside) · [How it works](#how-it-works) · [Sample agents](#sample-agents) · [**Contribute**](#contributing)
 
 </div>
 
@@ -103,7 +103,10 @@ flowchart LR
 4. **Publish.** A GitHub Actions workflow builds every day and uploads the
    files to Cloudflare. A failed or empty read publishes nothing.
 
-## Commands
+## Develop locally
+
+For working on a contribution. The site itself is at
+[agents.cintelis.ai](https://agents.cintelis.ai).
 
 ```bash
 pnpm install
@@ -118,47 +121,17 @@ fails the build, so a broken read never publishes an empty catalogue.
 
 ## Keeping it current
 
-The data is as fresh as the last build, so `.github/workflows/deploy.yml`
-builds the site from the registry and publishes it to Cloudflare:
+The public site is [agents.cintelis.ai](https://agents.cintelis.ai). Its data
+is as fresh as its last build, so it is rebuilt from the npm registry every
+day, and again whenever the site's code changes. A package you publish today
+appears within a day.
 
-- every day at 03:17 UTC,
-- on a push to `main` that changes the site, and
-- when someone presses "Run workflow" on the Actions page.
+A build that cannot read the registry, or that finds no packages at all,
+publishes nothing. The site that is already up stays up.
 
-It does not publish when the registry read fails, or when the build finds no
-packages at all. The site that is already up stays up.
-
-`wrangler.jsonc` describes the deployment: the files in `dist/`, served as
-static files, with `dist/404.html` for an unknown address. No code runs on
-Cloudflare. Cloudflare reads `dist/_headers`, which comes from
-`public/_headers`, and sends its security headers with every response.
-
-### Set up the deployment
-
-The workflow needs two repository secrets. Until both exist it builds the site
-each day and deploys nothing.
-
-1. In the Cloudflare dashboard, create an API token from the "Edit Cloudflare
-   Workers" template, limited to the one account.
-2. In the GitHub repository, under Settings, then Secrets and variables, then
-   Actions, add:
-   - `CLOUDFLARE_API_TOKEN`: the token.
-   - `CLOUDFLARE_ACCOUNT_ID`: the account ID from the Cloudflare dashboard.
-3. Run the Deploy workflow from the Actions page. The first run creates a
-   Worker called `standardagent-catalogue`.
-
-The site is at [agents.cintelis.ai](https://agents.cintelis.ai). `routes` in
-`wrangler.jsonc` names that address, and Cloudflare creates its DNS record and
-certificate on deploy. A fork must change it to a domain in its own Cloudflare
-account, or remove `routes` and use the `workers.dev` address that the deploy
-prints. To deploy by hand, run `pnpm build`, then `pnpm exec wrangler deploy`.
-
-GitHub turns off a scheduled workflow after 60 days without a commit to the
-repository. It sends an email first, and the Actions page has a button to turn
-the workflow back on.
-
-`dist/` is plain static files, so another host works too. It needs the headers
-from `public/_headers` in its own configuration.
+There is one catalogue, and it gets better when people add to it. To get an
+agent listed, publish it to npm. To improve the site or the samples, open a
+pull request. [CONTRIBUTING.md](CONTRIBUTING.md) covers both.
 
 ## How it treats package data
 
@@ -261,7 +234,8 @@ repository's samples show, not everything the specification allows.
 
 ## Continuous integration
 
-`.github/workflows/deploy.yml` publishes the site: see "Keeping it current".
+`.github/workflows/deploy.yml` rebuilds the site from npm and publishes it
+every day, and after each change to the site is merged.
 
 `.github/workflows/ci.yml` runs on every pull request and on pushes to `main`:
 
@@ -271,9 +245,14 @@ repository's samples show, not everything the specification allows.
 
 ## Contributing
 
-[CONTRIBUTING.md](CONTRIBUTING.md) covers the three ways to help: publish your
-own agent so that the catalogue lists it, add a sample agent, or change the
-site. Listing an agent needs no pull request.
+Contributions are welcome, and there are three ways to make one:
+
+- **Publish your own agent.** Put it on npm with the `standardagent` keyword
+  and the catalogue lists it within a day. No pull request.
+- **Add a sample agent** under `examples/`, for others to read and copy.
+- **Improve the site**: the pages, the checks on package data, the look.
+
+[CONTRIBUTING.md](CONTRIBUTING.md) has the steps for each.
 
 ## Licence
 

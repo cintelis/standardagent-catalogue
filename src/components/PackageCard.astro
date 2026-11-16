@@ -1,4 +1,5 @@
 ---
+import Identicon from './Identicon.astro';
 import { formatCount, formatDate, type CataloguePackage } from '../lib/npm';
 
 interface Props {
@@ -20,26 +21,29 @@ const search = [pkg.name, pkg.description, ...pkg.keywords, ...tags]
 ---
 
 <li class="card" data-card data-search={search}>
-  <h3 class="card-title">
-    <a href={href} rel={external ? 'noopener noreferrer nofollow' : undefined}>{pkg.name}</a>
-  </h3>
-  {pkg.description && <p>{pkg.description}</p>}
-  {
-    tags.length > 0 && (
-      <ul class="tags" aria-label="Entry agents">
-        {tags.map((tag) => (
-          <li>{tag}</li>
-        ))}
-      </ul>
-    )
-  }
-  <div class="meta">
-    <span>v{pkg.version}</span>
-    {pkg.date && <span>Updated {formatDate(pkg.date)}</span>}
+  <Identicon name={pkg.name} />
+  <div class="card-body">
+    <h3 class="card-title">
+      <a href={href} rel={external ? 'noopener noreferrer nofollow' : undefined}>{pkg.name}</a>
+    </h3>
+    {pkg.description && <p>{pkg.description}</p>}
     {
-      pkg.monthlyDownloads !== null && (
-        <span>{formatCount(pkg.monthlyDownloads)} downloads a month</span>
+      tags.length > 0 && (
+        <ul class="tags" aria-label="Entry agents">
+          {tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
       )
     }
+    <div class="meta">
+      <span>v{pkg.version}</span>
+      {pkg.date && <span>Updated {formatDate(pkg.date)}</span>}
+      {
+        pkg.monthlyDownloads !== null && (
+          <span>{formatCount(pkg.monthlyDownloads)} downloads a month</span>
+        )
+      }
+    </div>
   </div>
 </li>

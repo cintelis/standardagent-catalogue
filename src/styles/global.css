@@ -28,6 +28,11 @@
   --counter-bg: #e6eaef;
   --tab-active: #fd8c73;
   --focus: #0969da;
+  --btn-bg: #f6f8fa;
+  --btn-hover-bg: #eff2f5;
+  --btn-primary-bg: #1f883d;
+  --btn-primary-hover-bg: #1c8139;
+  --btn-primary-border: #1a7f37;
 
   --radius: 6px;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
@@ -51,6 +56,11 @@
     --counter-bg: #2f3742;
     --tab-active: #f78166;
     --focus: #4493f8;
+    --btn-bg: #212830;
+    --btn-hover-bg: #262c36;
+    --btn-primary-bg: #238636;
+    --btn-primary-hover-bg: #29903b;
+    --btn-primary-border: #2ea043;
   }
 }
 
@@ -127,14 +137,11 @@ a:focus-visible,
   font-weight: 600;
 }
 
-/* The mark: a small package, drawn with two boxes. */
-.brand::before {
-  content: '';
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--fg-muted);
-  border-radius: 4px;
-  background: linear-gradient(var(--fg-muted), var(--fg-muted)) center 4px / 100% 2px no-repeat;
+/* The logo, the same one as the favicon. */
+.brand-mark {
+  flex: none;
+  width: 24px;
+  height: 24px;
 }
 
 /* A small outlined label, such as "Open index" or a version. */
@@ -148,6 +155,49 @@ a:focus-visible,
   font-weight: 500;
   line-height: 18px;
   white-space: nowrap;
+}
+
+.header-links {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--btn-bg);
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--btn-hover-bg);
+  text-decoration: none;
+}
+
+.btn-primary {
+  padding: 5px 16px;
+  border-color: var(--btn-primary-border);
+  background: var(--btn-primary-bg);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-hover-bg);
+}
+
+.icon {
+  flex: none;
+  color: var(--fg-muted);
 }
 
 /* The tabs. The current one has a line under it. */
@@ -173,6 +223,9 @@ a:focus-visible,
 }
 
 .site-nav a > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 5px 8px;
   border-radius: var(--radius);
 }
@@ -225,7 +278,6 @@ h2 {
 }
 
 .lede {
-  max-width: 760px;
   margin: 0 0 16px;
   color: var(--fg-muted);
 }
@@ -239,6 +291,19 @@ h2 {
 
 .page-head .lede {
   margin-bottom: 0;
+}
+
+/* A heading with a button to its right. */
+.page-head.with-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.page-head.with-action > div {
+  flex: 1 1 320px;
 }
 
 /* ------------------------------------------------------------------ search */
@@ -330,8 +395,7 @@ h2 {
 
 .card {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  gap: 12px;
   padding: 16px;
   border-top: 1px solid var(--border-muted);
 }
@@ -352,6 +416,30 @@ h2 {
   border-radius: 0 0 var(--radius) var(--radius);
 }
 
+.card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* The picture that stands for a package. src/lib/identicon.ts draws it from
+   the package's name. */
+.avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius);
+  background: var(--canvas-subtle);
+}
+
+.avatar-small {
+  width: 28px;
+  height: 28px;
+}
+
 .card-title {
   display: flex;
   flex-wrap: wrap;
@@ -364,7 +452,6 @@ h2 {
 }
 
 .card p {
-  max-width: 760px;
   margin: 0;
   color: var(--fg-muted);
   overflow-wrap: anywhere;
@@ -414,8 +501,7 @@ h2 {
 }
 
 .empty p {
-  max-width: 560px;
-  margin: 4px auto;
+  margin: 4px 0;
 }
 
 .empty strong {
@@ -449,7 +535,6 @@ code {
 }
 
 pre {
-  max-width: 760px;
   margin: 0 0 16px;
   padding: 16px;
   overflow-x: auto;
@@ -462,10 +547,6 @@ pre code {
   padding: 0;
   background: none;
   overflow-wrap: normal;
-}
-
-.box-body pre {
-  max-width: none;
 }
 
 /* ------------------------------------------------------------ package page */
@@ -525,7 +606,6 @@ pre code {
 }
 
 .plain-list {
-  max-width: 760px;
   margin-block: 0 16px;
   padding-left: 2em;
 }
@@ -548,8 +628,16 @@ pre code {
 }
 
 .site-footer p {
-  max-width: 760px;
   margin: 4px 0;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
 @media (max-width: 768px) {

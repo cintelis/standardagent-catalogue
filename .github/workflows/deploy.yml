@@ -41,7 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      # Wrangler reads these two. They are repository secrets: see the README.
+      # Wrangler reads these two. They are repository secrets: see the
+      # maintainers' section of CONTRIBUTING.md.
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
@@ -89,4 +90,4 @@ jobs:
       # the site builds from the registry.
       - name: Say why nothing was deployed
         if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
-        run: echo "::warning::Built the site but did not deploy it. Add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets. The README says how."
+        run: echo "::warning::Built the site but did not deploy it. The CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets are missing. See the maintainers' section of CONTRIBUTING.md."

@@ -1,4 +1,5 @@
 ---
+import Identicon from '../components/Identicon.astro';
 import Base from '../layouts/Base.astro';
 import { safeUrl } from '../lib/npm';
 import runtimes from '../data/runtimes.json';
@@ -25,12 +26,15 @@ const listed = runtimes
     {
       listed.map((runtime) => (
         <li class="card">
-          <h3 class="card-title">
-            <a href={runtime.url} rel="noopener noreferrer">
-              {runtime.name}
-            </a>
-          </h3>
-          <p>{runtime.description}</p>
+          <Identicon name={runtime.name} />
+          <div class="card-body">
+            <h3 class="card-title">
+              <a href={runtime.url} rel="noopener noreferrer">
+                {runtime.name}
+              </a>
+            </h3>
+            <p>{runtime.description}</p>
+          </div>
         </li>
       ))
     }
