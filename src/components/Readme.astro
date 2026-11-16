@@ -1,0 +1,125 @@
+---
+/**
+ * Draws the tree that `src/lib/readme.ts` makes from a package's README.
+ *
+ * Every string goes through Astro, which escapes it. Nothing here uses
+ * `set:html`, so no markup from a publisher can reach the page.
+ */
+import type { Block, Inline } from '../lib/readme';
+
+interface Props {
+  blocks?: Block[];
+  inlines?: Inline[];
+}
+
+const { blocks, inlines } = Astro.props;
+const external = 'noopener noreferrer nofollow';
+---
+
+{
+  inlines?.map((node) => {
+    switch (node.type) {
+      case 'text':
+        return node.value;
+      case 'code':
+        return <code>{node.value}</code>;
+      case 'break':
+        return <br />;
+      case 'strong':
+        return (
+          <strong>
+            <Astro.self inlines={node.children} />
+          </strong>
+        );
+      case 'emphasis':
+        return (
+          <em>
+            <Astro.self inlines={node.children} />
+          </em>
+        );
+      case 'strike':
+        return (
+          <del>
+            <Astro.self inlines={node.children} />
+          </del>
+        );
+      case 'link':
+        return (
+          <a href={node.href} rel={external}>
+            <Astro.self inlines={node.children} />
+          </a>
+        );
+    }
+  })
+}
+
+{
+  blocks?.map((block) => {
+    switch (block.type) {
+      case 'heading': {
+        const Tag = `h${block.level}`;
+        return (
+          <Tag>
+            <Astro.self inlines={block.children} />
+          </Tag>
+        );
+      }
+      case 'paragraph':
+        return (
+          <p>
+            <Astro.self inlines={block.children} />
+          </p>
+        );
+      case 'plain':
+        return <Astro.self inlines={block.children} />;
+      case 'code':
+        // On one line: white space inside <pre> shows on the page.
+        return <pre><code>{block.value}</code></pre>;
+      case 'quote':
+        return (
+          <blockquote>
+            <Astro.self blocks={block.children} />
+          </blockquote>
+        );
+      case 'list': {
+        const items = block.items.map((item) => (
+          <li>
+            <Astro.self blocks={item} />
+          </li>
+        ));
+        return block.ordered ? <ol start={block.start}>{items}</ol> : <ul>{items}</ul>;
+      }
+      case 'table':
+        return (
+          <div class="table-scroll">
+            <table>
+              {block.head.length > 0 && (
+                <thead>
+                  <tr>
+                    {block.head.map((cell) => (
+                      <th>
+                        <Astro.self inlines={cell} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              )}
+              <tbody>
+                {block.rows.map((row) => (
+                  <tr>
+                    {row.map((cell) => (
+                      <td>
+                        <Astro.self inlines={cell} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      case 'rule':
+        return <hr />;
+    }
+  })
+}

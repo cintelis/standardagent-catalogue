@@ -121,8 +121,9 @@ its publisher:
 - **Only `src/lib/npm.ts` reads the registry.** It checks each field's type,
   caps its length, and keeps only plain `http` and `https` links. A page takes
   its data from there and nowhere else.
-- **Pages render values as text.** No page renders a README or other HTML from
-  a package. Do not use `set:html` with package data.
+- **Pages render values as text.** Do not use `set:html` with package data. A
+  README is shown through `src/lib/readme.ts`, which keeps its structure and
+  drops its HTML and pictures. Add what it should keep there, not in a page.
 - **No inline script or style.** The Content-Security-Policy in
   `public/_headers` allows only the site's own files, so a `style` attribute or
   an inline `<script>` will not run. Fonts and images from other sites are

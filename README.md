@@ -52,7 +52,7 @@ site's Publish page shows the exact `package.json`.
       <img src="docs/screenshots/package.png" alt="The page of one agent package">
       <h3>Agent page</h3>
       <p>What one package declares: its entry agents, effects, thread endpoints, and the hooks it
-      adds to a parent, plus its version, licence, and links on npm.</p>
+      adds to a parent, then its README, plus its version, licence, and links on npm.</p>
       <p><code>/package/&lt;name&gt;/</code> · <code>src/pages/package/[...name].astro</code></p>
     </td>
   </tr>
@@ -143,8 +143,12 @@ it as untrusted. `src/lib/npm.ts` is the only code that reads the registry:
   credentials.
 - It takes the package's name and keywords from the package's own manifest, not
   from the search index.
-- Pages render every value as text. No page renders a README or other HTML from
-  a package.
+- Pages render every value as text.
+- A package's page shows its README, but not as the publisher's HTML.
+  `src/lib/readme.ts` reads the Markdown and keeps only headings, paragraphs,
+  lists, quotes, tables, code, emphasis, and links to plain `http` and `https`
+  addresses. It drops raw HTML and pictures. A picture from a publisher's
+  server would tell that server who is reading.
 
 `tests/fixtures` includes a hostile package, and `tests/site.test.mjs` checks
 that none of its markup or links reach the built pages.
@@ -264,6 +268,7 @@ one as the start of your own.
 ```text
 src/
 ├── lib/npm.ts                 # Reads and validates npm data, once per build
+├── lib/readme.ts              # Reads a README into a tree that is safe to draw
 ├── data/runtimes.json         # The runtime list
 ├── layouts/Base.astro         # Header, navigation, footer
 ├── components/
