@@ -151,6 +151,23 @@ a phone's width.
 A maintainer reviews each pull request. A listing in the catalogue is
 automatic and is not a review; a sample in this repository is reviewed.
 
+## For maintainers: how the site is published
+
+Contributors do not deploy anything. A merged pull request reaches
+[agents.cintelis.ai](https://agents.cintelis.ai) on its own.
+
+`.github/workflows/deploy.yml` builds the site from the npm registry and
+publishes it to Cloudflare every day at 03:17 UTC, on a push to `main` that
+changes the site, and from the "Run workflow" button on the Actions page. It
+publishes nothing when the registry read fails or when the build finds no
+packages at all.
+
+- It reads two repository secrets, `CLOUDFLARE_API_TOKEN` and
+  `CLOUDFLARE_ACCOUNT_ID`. Without them it builds the site and deploys nothing.
+- `wrangler.jsonc` names the Worker and the address.
+- GitHub turns off a scheduled workflow after 60 days without a commit. It
+  sends an email first, and the Actions page has a button to turn it back on.
+
 ## Report a security problem
 
 Do not open a public issue for a security problem. Open a private report from
