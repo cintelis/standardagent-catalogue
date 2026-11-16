@@ -7,7 +7,9 @@
  * `rust/src/lib.rs` describes the same boundary from the other side.
  */
 
-import { WASM_BASE64 } from './generated/wasm-bytes.js';
+// package.json maps this name to one of two loaders: `wasm-module.ts`, or
+// `wasm-module.workerd.ts` when a bundler builds for Cloudflare Workers.
+import { wasmModule } from '#wasm-module';
 
 /** One problem the checker found. */
 export interface CheckIssue {
@@ -65,12 +67,11 @@ interface DrawgenExports {
 
 let cached: DrawgenExports | undefined;
 
-/** Compiles the module on first use and reuses it afterwards. */
+/** Starts the module on first use and reuses it afterwards. */
 function load(): DrawgenExports {
   if (!cached) {
-    const bytes = Uint8Array.from(atob(WASM_BASE64), (char) => char.charCodeAt(0));
     // The module imports nothing, so it can reach no network, file, or clock.
-    const instance = new WebAssembly.Instance(new WebAssembly.Module(bytes), {});
+    const instance = new WebAssembly.Instance(wasmModule(), {});
     cached = instance.exports as unknown as DrawgenExports;
   }
   return cached;

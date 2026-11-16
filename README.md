@@ -76,6 +76,27 @@ Rust, compiled to WebAssembly, does the work behind its tools.
 Each sample is a separate package with its own dependencies and tests, and the
 catalogue's build does not include them.
 
+### WebAssembly or a container
+
+The samples show a way to split an agent's work. Put the deterministic,
+self-contained work in WebAssembly inside the agent package, and call out to a
+sandbox service only for the tasks that need an operating system.
+
+For an agent you want others to install and run, that matters because the
+WebAssembly part travels with the package, whereas a container dependency makes
+every user provision infrastructure.
+
+| | WebAssembly in the package | Container or sandbox service |
+|---|---|---|
+| Suits | Work that takes bytes in and gives bytes out: parsing, validating, layout, rendering, text analysis | Running other programs, running code the model wrote, native libraries, direct file or network access |
+| Starts in | Milliseconds, inside the agent's own process | Seconds |
+| Can reach | Only what the JavaScript hands it | Whatever the sandbox allows |
+| Arrives | With `npm install` | As separate infrastructure that each user sets up |
+
+The diagram sample draws this line itself. It ports the diagram builder, the
+checker, and the SVG renderer, and it leaves out PNG and PDF export, because
+those need a desktop program.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs on every pull request and on pushes to `main`:

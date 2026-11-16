@@ -11,6 +11,13 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./text_stats.wasm": "./dist/text_stats.wasm"
+  },
+  "imports": {
+    "#wasm-module": {
+      "workerd": "./dist/wasm-module.workerd.js",
+      "default": "./dist/wasm-module.js"
     }
   },
   "files": [

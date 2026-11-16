@@ -83,7 +83,9 @@ writer ──▶ agent (text_coach)           src/agents/text_coach.ts
 
 1. `cargo build --release --target wasm32-unknown-unknown` writes
    `rust/target/wasm32-unknown-unknown/release/text_stats.wasm`.
-2. The script embeds that file as base64 in `src/generated/wasm-bytes.ts`.
+2. The script embeds that file as base64 in `src/generated/wasm-bytes.ts`,
+   and copies the file itself to `dist/text_stats.wasm`. "Where it runs" says
+   which runtime uses which.
 3. It copies the name and version from `package.json` into
    `src/generated/package-info.ts`, so `__meta` cannot drift from the manifest.
 
@@ -104,15 +106,36 @@ so that each step is visible.
 - Add a second tool. Create a file in `src/tools/`, add it to `tools` in
   `src/index.ts`, and name it in the prompt's `tools` list.
 
+## Where it runs
+
+The package carries the WebAssembly module in two forms, and `package.json`
+picks one:
+
+| Where | Loader | How the module arrives |
+|---|---|---|
+| Node, Deno, Bun, browsers | `src/wasm-module.ts` | As base64 inside the JavaScript, compiled on first use |
+| Cloudflare Workers | `src/wasm-module.workerd.ts` | As `dist/text_stats.wasm`, imported as a module |
+
+A Worker may not compile a module from bytes at run time, so it needs the
+file. `src/wasm.ts` imports `#wasm-module`, and the `imports` field in
+`package.json` maps that name to the Workers loader under the `workerd`
+condition, which Wrangler sets when it bundles. The base64 copy then stays out
+of the Worker.
+
+This was checked by hand, not in CI: a Worker that imports the built package
+was bundled with Wrangler 4 and run in its local runtime, and the `analyze_text` tool
+returned the same result as on Node. The Worker needs the `nodejs_compat`
+compatibility flag, because the model provider package imports Node modules.
+
+Another bundler, or a runtime with the same rule under another condition
+name, can import the file directly: the package exports it as
+`<package name>/text_stats.wasm`.
+
 ## What the sample does not do
 
 - **It has not run on a hosted runtime.** The tests load the package, check
   every definition, and run the tool. A full conversation needs a runtime that
   implements the specification, and an API key for the model provider.
-- **The WebAssembly loader compiles the module from bytes at run time.** Node,
-  Deno, Bun, and browsers allow that. Cloudflare Workers does not: a Worker must
-  import a `.wasm` file as a module. To run there, change `load()` in
-  `src/wasm.ts` to use a static import. Nothing else needs to change.
 - **The statistics are English heuristics.** Syllables are estimated from vowel
   groups, and an abbreviation such as "e.g." counts as the end of a sentence.
 

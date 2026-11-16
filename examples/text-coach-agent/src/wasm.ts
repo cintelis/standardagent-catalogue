@@ -7,7 +7,9 @@
  * memory.
  */
 
-import { WASM_BASE64 } from './generated/wasm-bytes.js';
+// package.json maps this name to one of two loaders: `wasm-module.ts`, or
+// `wasm-module.workerd.ts` when a bundler builds for Cloudflare Workers.
+import { wasmModule } from '#wasm-module';
 
 /** The numbers the Rust code returns. The field names match the Rust `Stats` struct. */
 export interface TextStats {
@@ -37,13 +39,12 @@ interface TextStatsExports {
 
 let cached: TextStatsExports | undefined;
 
-/** Compiles the module on first use and reuses it afterwards. */
+/** Starts the module on first use and reuses it afterwards. */
 function load(): TextStatsExports {
   if (!cached) {
-    const bytes = Uint8Array.from(atob(WASM_BASE64), (char) => char.charCodeAt(0));
     // The module imports nothing, so it can reach no network, file, or clock.
     // It can only compute on the bytes it is given.
-    const instance = new WebAssembly.Instance(new WebAssembly.Module(bytes), {});
+    const instance = new WebAssembly.Instance(wasmModule(), {});
     cached = instance.exports as unknown as TextStatsExports;
   }
   return cached;

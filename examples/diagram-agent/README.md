@@ -97,7 +97,8 @@ requester ──▶ agent (diagram_designer)      src/agents/diagram_designer.ts
    `handle` wraps it in JSON. The `ffi` module is the WebAssembly boundary.
 3. **`rust/src/spec.rs`**, then **`diagram.rs`**, **`check.rs`**, and
    **`render.rs`**. Each starts with a comment that says what it does.
-4. **`src/wasm.ts`**. The TypeScript side of the boundary.
+4. **`src/wasm.ts`**. The TypeScript side of the boundary. It gets the module
+   from one of two loaders: see "Where it runs".
 5. **`src/tools/create_diagram.ts`**. The argument schema is what the model
    sees. The result has two parts: the report as text and the SVG as an
    attachment.
@@ -141,6 +142,31 @@ for the specs in `test/fixtures/specs`:
   `center` or `right`, and an edge arrow must be a name made of letters.
   drawgen copies these three values into a draw.io style as they are.
 
+## Where it runs
+
+The package carries the WebAssembly module in two forms, and `package.json`
+picks one:
+
+| Where | Loader | How the module arrives |
+|---|---|---|
+| Node, Deno, Bun, browsers | `src/wasm-module.ts` | As base64 inside the JavaScript, compiled on first use |
+| Cloudflare Workers | `src/wasm-module.workerd.ts` | As `dist/drawgen_core.wasm`, imported as a module |
+
+A Worker may not compile a module from bytes at run time, so it needs the
+file. `src/wasm.ts` imports `#wasm-module`, and the `imports` field in
+`package.json` maps that name to the Workers loader under the `workerd`
+condition, which Wrangler sets when it bundles. The base64 copy then stays out
+of the Worker.
+
+This was checked by hand, not in CI: a Worker that imports the built package
+was bundled with Wrangler 4 and run in its local runtime, and the `create_diagram` tool
+returned the same result as on Node. The Worker needs the `nodejs_compat`
+compatibility flag, because the model provider package imports Node modules.
+
+Another bundler, or a runtime with the same rule under another condition
+name, can import the file directly: the package exports it as
+`<package name>/drawgen_core.wasm`.
+
 ## What the sample does not do
 
 - **It has not run on a hosted runtime.** The tests load the package, check
@@ -157,10 +183,6 @@ for the specs in `test/fixtures/specs`:
 - **One page for each call.** The Rust code builds several pages from a
   `pages` list, and the tests cover it. The `create_diagram` tool takes one
   page, to keep its argument schema small.
-- **The WebAssembly loader compiles the module from bytes at run time.** Node,
-  Deno, Bun, and browsers allow that. Cloudflare Workers does not: a Worker
-  must import a `.wasm` file as a module. To run there, change `load()` in
-  `src/wasm.ts` to use a static import.
 
 ## Safety notes
 
