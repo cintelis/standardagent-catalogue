@@ -1,0 +1,15 @@
+// Deploys the built site to Cloudflare as static files. No code runs on
+// Cloudflare: there is no "main" script, only the files in dist/.
+// .github/workflows/deploy.yml runs `wrangler deploy` with this file.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "standardagent-catalogue",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    // Cloudflare reads dist/_headers, which comes from public/_headers, and
+    // sends the security headers in it with every response.
+    "directory": "./dist",
+    // An unknown address gets dist/404.html, from src/pages/404.astro.
+    "not_found_handling": "404-page"
+  }
+}

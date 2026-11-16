@@ -16,11 +16,11 @@ const external = 'noopener noreferrer nofollow';
 ---
 
 <Base title={pkg.name} description={pkg.description || `${pkg.name}, a Standard Agent package.`}>
-  <p><a href="/">← All agents</a></p>
+  <a class="back" href="/">← All agents</a>
   <h1>{pkg.name}</h1>
   {pkg.description && <p class="lede">{pkg.description}</p>}
 
-  <pre><code>npm install {pkg.name}</code></pre>
+  <pre class="command"><code>npm install {pkg.name}</code></pre>
 
   <p class="note">
     This page is built from the package's own metadata. Nobody has reviewed the package. It

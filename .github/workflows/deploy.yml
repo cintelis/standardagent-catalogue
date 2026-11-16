@@ -1,0 +1,92 @@
+name: Deploy
+
+# Builds the site from the live npm registry and publishes it to Cloudflare.
+# The catalogue is only as fresh as its last build, so this runs every day.
+
+on:
+  schedule:
+    # Every day at 03:17 UTC. Off the hour, when GitHub's schedule is less busy.
+    - cron: '17 3 * * *'
+  push:
+    branches: [main]
+    # Only when something that changes the built site changes.
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'astro.config.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'wrangler.jsonc'
+      - '.github/workflows/deploy.yml'
+  # The "Run workflow" button on the Actions page.
+  workflow_dispatch:
+
+# The job only reads the repository.
+permissions:
+  contents: read
+
+# One deploy at a time. A deploy that has started is left to finish.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '12.11.2'
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Wrangler reads these two. They are repository secrets: see the README.
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      # Each action is pinned to the commit of the release named in the comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Reads registry.npmjs.org. A registry failure fails this step, so the
+      # site that is already published stays up.
+      - name: Build from the npm registry
+        run: pnpm build
+
+      # A registry that answers with nothing would build an empty site without
+      # an error. Do not publish that over a full one.
+      - name: Check that the catalogue is not empty
+        run: |
+          node --input-type=module <<'EOF'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const { agents, ecosystem, fetchedAt } = JSON.parse(readFileSync('dist/catalogue.json', 'utf8'));
+          const line = `${agents.length} agent package(s) and ${ecosystem.length} ecosystem package(s), read ${fetchedAt}`;
+          console.log(line);
+          if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${line}\n`);
+          if (agents.length + ecosystem.length === 0) {
+            console.error('::error::The build found no packages at all. Not deploying.');
+            process.exit(1);
+          }
+          EOF
+
+      - name: Deploy to Cloudflare
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        run: pnpm exec wrangler deploy
+
+      # Until the two secrets exist, the workflow still proves each day that
+      # the site builds from the registry.
+      - name: Say why nothing was deployed
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
+        run: echo "::warning::Built the site but did not deploy it. Add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets. The README says how."
