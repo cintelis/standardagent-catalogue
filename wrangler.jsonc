@@ -8,6 +8,9 @@
   // The site's address. Cloudflare creates the DNS record and the certificate
   // when this is deployed. The zone cintelis.ai is in the same account.
   "routes": [{ "pattern": "agents.cintelis.ai", "custom_domain": true }],
+  // Wrangler turns the workers.dev address off once a route is set. Keep it,
+  // as a second way in if the domain has a problem.
+  "workers_dev": true,
   "assets": {
     // Cloudflare reads dist/_headers, which comes from public/_headers, and
     // sends the security headers in it with every response.
