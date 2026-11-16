@@ -5,6 +5,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "standardagent-catalogue",
   "compatibility_date": "2026-11-01",
+  // The site's address. Cloudflare creates the DNS record and the certificate
+  // when this is deployed. The zone cintelis.ai is in the same account.
+  "routes": [{ "pattern": "agents.cintelis.ai", "custom_domain": true }],
   "assets": {
     // Cloudflare reads dist/_headers, which comes from public/_headers, and
     // sends the security headers in it with every response.
