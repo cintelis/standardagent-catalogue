@@ -4,6 +4,8 @@
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -13,10 +15,20 @@ const distDir = `${root}dist`;
 const target = 'wasm32-unknown-unknown';
 
 // 1. Compile Rust to WebAssembly.
+//    A compiled module holds the paths of its source files, for panic
+//    messages. These flags swap the two folders that differ from one machine
+//    to the next for fixed names, so that the module does not carry the
+//    builder's home folder, and the same source gives the same bytes.
+const cargoHome = process.env.CARGO_HOME ?? join(homedir(), '.cargo');
+const remap = [
+  `--remap-path-prefix=${cargoHome}=/cargo`,
+  `--remap-path-prefix=${root.replace(/[\\/]$/, '')}=/src`,
+];
 try {
   execFileSync('cargo', ['build', '--release', '--locked', '--target', target], {
     cwd: rustDir,
     stdio: 'inherit',
+    env: { ...process.env, RUSTFLAGS: [process.env.RUSTFLAGS, ...remap].filter(Boolean).join(' ') },
   });
 } catch {
   console.error(

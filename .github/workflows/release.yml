@@ -1,0 +1,180 @@
+# Releases a sample agent to npm, in two steps with a person in between.
+#
+#   git tag -a diagram-agent-v0.1.0 -m "..." && git push origin diagram-agent-v0.1.0
+#
+# 1. The tag builds and tests the package, packs it, and puts the tarball in a
+#    DRAFT release with signed build provenance. Nothing is on npm yet.
+# 2. A maintainer checks the draft and signs it offline with the Cintelis
+#    release key (scripts/sign-release.sh), which publishes the release.
+# 3. Publishing the release runs the `npm` job. It checks the signature and
+#    sends that same tarball to npm, with npm provenance.
+#
+# A tag is `<folder under examples/>-v<version>`, and the version must be the
+# one in that folder's package.json.
+name: Release
+
+on:
+  push:
+    tags: ['*-v[0-9]*']
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '12.11.2'
+
+jobs:
+  build:
+    name: Build a draft release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # create the draft release
+      id-token: write # sign the build provenance
+      attestations: write
+    steps:
+      # Each action is pinned to the commit of the release named in the comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: tag
+        name: Read the tag
+        run: |
+          set -eu
+          example="${GITHUB_REF_NAME%-v*}"
+          version="${GITHUB_REF_NAME##*-v}"
+          dir="examples/$example"
+          [ -f "$dir/package.json" ] || { echo "::error::No package at $dir for the tag $GITHUB_REF_NAME"; exit 1; }
+          pkg=$(node -p "require('./$dir/package.json').version")
+          if [ "$version" != "$pkg" ]; then
+            echo "::error::The tag says $version but $dir/package.json says $pkg. Change package.json first."
+            exit 1
+          fi
+          if [ "$(node -p "require('./$dir/package.json').private === true")" = "true" ]; then
+            echo "::error::$dir/package.json is marked private."
+            exit 1
+          fi
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: ${{ steps.tag.outputs.dir }}/pnpm-lock.yaml
+
+      # rust-toolchain.toml in the package names the Rust release, the
+      # components, and the WebAssembly target. rustup installs them here.
+      - name: Install the Rust toolchain
+        working-directory: ${{ steps.tag.outputs.dir }}
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - name: Install dependencies
+        working-directory: ${{ steps.tag.outputs.dir }}
+        run: pnpm install --frozen-lockfile
+
+      # The same checks as CI, on the exact commit that is released.
+      - name: Rust formatting and lints
+        working-directory: ${{ steps.tag.outputs.dir }}
+        run: |
+          cargo fmt --manifest-path rust/Cargo.toml --check
+          cargo clippy --manifest-path rust/Cargo.toml --all-targets --locked -- -D warnings
+      - name: Build and test the package
+        working-directory: ${{ steps.tag.outputs.dir }}
+        run: pnpm test
+
+      - name: Pack
+        working-directory: ${{ steps.tag.outputs.dir }}
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/release"
+          npm pack --pack-destination "$RUNNER_TEMP/release"
+          cd "$RUNNER_TEMP/release"
+          sha256sum -- *.tgz > checksums.txt
+          cat checksums.txt
+
+      # Verifiable with: gh attestation verify <file> --repo cintelis/standardagent-catalogue
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            ${{ runner.temp }}/release/*.tgz
+            ${{ runner.temp }}/release/checksums.txt
+
+      # A draft: nothing is installable until a maintainer signs checksums.txt
+      # offline and publishes (scripts/sign-release.sh). A rerun replaces an
+      # earlier draft of the same tag.
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          if [ "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>/dev/null || echo none)" = "true" ]; then
+            gh release delete "$GITHUB_REF_NAME" --yes
+          fi
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/release/*.tgz "$RUNNER_TEMP/release/checksums.txt" \
+            --draft --title "$GITHUB_REF_NAME" --generate-notes
+
+  # Sends the signed tarball to npm. It does not build anything: what goes to
+  # npm is the file a maintainer checked and signed.
+  #
+  # It uses npm's "trusted publisher", so no token is stored: on npmjs.com, the
+  # package names this repository and this workflow file. npm only lets a
+  # package that already exists name a trusted publisher, so the first release
+  # of a new package needs the NPM_TOKEN secret, once.
+  npm:
+    name: Publish to npm
+    if: github.event_name == 'release' && !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # npm provenance and trusted publishing
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+
+      - name: Download the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "$GITHUB_REF_NAME" --dir "$RUNNER_TEMP/release"
+
+      - name: Check the signature and the checksums
+        working-directory: ${{ runner.temp }}/release
+        run: |
+          set -eu
+          ns="standardagent-catalogue-release"
+          printf '%s namespaces="%s" %s\n' "$ns" "$ns" "$(cut -d' ' -f1,2 "$GITHUB_WORKSPACE/scripts/release_key.pub")" > "$RUNNER_TEMP/allowed_signers"
+          ssh-keygen -Y verify -f "$RUNNER_TEMP/allowed_signers" -I "$ns" -n "$ns" -s checksums.txt.sig < checksums.txt
+          sha256sum -c checksums.txt
+
+      - name: The tarball must be the package the tag names
+        working-directory: ${{ runner.temp }}/release
+        run: |
+          set -eu
+          example="${GITHUB_REF_NAME%-v*}"
+          version="${GITHUB_REF_NAME##*-v}"
+          tar -xzf ./*.tgz package/package.json
+          want=$(node -p "require('$GITHUB_WORKSPACE/examples/$example/package.json').name")
+          got=$(node -p "const p = require('./package/package.json'); p.name + '@' + p.version")
+          [ "$got" = "$want@$version" ] || { echo "::error::The tarball is $got, but the tag names $want@$version"; exit 1; }
+          rm -r package
+
+      - run: npm install -g npm@latest # trusted publishing needs npm 11.5 or later
+      - name: Publish
+        working-directory: ${{ runner.temp }}/release
+        env:
+          # Empty unless the NPM_TOKEN secret exists. See the note on this job.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish ./*.tgz --provenance --access public

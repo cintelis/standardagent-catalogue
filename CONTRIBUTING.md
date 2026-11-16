@@ -168,6 +168,44 @@ packages at all.
 - GitHub turns off a scheduled workflow after 60 days without a commit. It
   sends an email first, and the Actions page has a button to turn it back on.
 
+## For maintainers: how a sample agent is released to npm
+
+A release has a person in the middle. A machine builds it, a maintainer signs
+it, and only then does it reach npm.
+
+1. Set the version in the sample's `package.json`, and merge that.
+2. Tag it and push the tag. The tag is the sample's folder, `-v`, and the
+   version:
+
+   ```bash
+   git tag -a diagram-agent-v0.1.0 -m "Diagram agent 0.1.0"
+   git push origin diagram-agent-v0.1.0
+   ```
+
+   `.github/workflows/release.yml` builds and tests the package on that
+   commit, packs it, and puts the tarball and `checksums.txt` in a draft
+   release, with signed build provenance. Nothing is on npm yet.
+3. Sign the draft with the Cintelis release key:
+
+   ```bash
+   scripts/sign-release.sh diagram-agent-v0.1.0
+   ```
+
+   The script checks that the release workflow built the tarball, shows what
+   is in it, and asks before it signs. Then it uploads `checksums.txt.sig`
+   and publishes the release. The private key stays on the maintainer's
+   machine. Its public half is `scripts/release_key.pub`.
+4. Publishing the release starts the `npm` job. It checks the signature and
+   the checksum, and sends that same tarball to npm with npm provenance.
+
+npm publishes without a stored token, through a "trusted publisher": on
+npmjs.com, the package's settings name this repository and the workflow file
+`release.yml`. npm lets only a package that already exists name one, so the
+first release of a new package needs an `NPM_TOKEN` repository secret. Remove
+the secret once the trusted publisher is set.
+
+Anyone can check a release with `scripts/verify-release.sh <tag>`.
+
 ## Report a security problem
 
 Do not open a public issue for a security problem. Open a private report from

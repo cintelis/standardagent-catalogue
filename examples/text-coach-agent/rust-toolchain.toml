@@ -1,6 +1,8 @@
-# rustup reads this file. It uses the stable toolchain and adds the components
-# and the WebAssembly target that the build and the checks need.
+# rustup reads this file. It installs this release of Rust, with the components
+# and the WebAssembly target that the build and the checks need. A fixed
+# release means the same source builds the same .wasm file on every machine,
+# and a new Rust release cannot fail the lints on its own.
 [toolchain]
-channel = "stable"
+channel = "1.100.0"
 components = ["rustfmt", "clippy"]
 targets = ["wasm32-unknown-unknown"]

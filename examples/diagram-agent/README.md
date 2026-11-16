@@ -16,7 +16,25 @@ with a much smaller Rust crate.
   writes the draw.io XML, checks it, and draws the SVG. It compiles to
   WebAssembly, and the TypeScript tools call it.
 
-The package is marked `"private": true`, so `npm publish` refuses it.
+It is published to npm as
+[`@cintelisai/diagram-agent`](https://www.npmjs.com/package/@cintelisai/diagram-agent):
+
+```bash
+npm install @cintelisai/diagram-agent
+```
+
+It is an early release. The tools are tested, on Node and on the Cloudflare
+Workers runtime, but nobody has yet run a full conversation through a hosted
+runtime: see "What the sample does not do".
+
+Each release is built by this repository's release workflow and signed with
+the Cintelis release key before it reaches npm. To check one, from the root of
+this repository:
+
+```bash
+scripts/verify-release.sh diagram-agent-v0.1.0
+npm audit signatures        # In a project that has installed the package
+```
 
 ## Why a diagram builder suits an agent
 

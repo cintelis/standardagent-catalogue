@@ -1,9 +1,18 @@
 {
-  "name": "standardagent-sample-diagram-designer",
+  "name": "@cintelisai/diagram-agent",
   "version": "0.1.0",
-  "private": true,
-  "description": "A sample Standard Agent that designs draw.io diagrams. A TypeScript agent drives a diagram builder, checker, and SVG renderer written in Rust.",
+  "description": "A Standard Agent that designs draw.io diagrams. A TypeScript agent drives a diagram builder, checker, and SVG renderer written in Rust and compiled to WebAssembly.",
   "license": "MIT",
+  "author": "Cintelis",
+  "homepage": "https://github.com/cintelis/standardagent-catalogue/tree/main/examples/diagram-agent#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cintelis/standardagent-catalogue.git",
+    "directory": "examples/diagram-agent"
+  },
+  "bugs": {
+    "url": "https://github.com/cintelis/standardagent-catalogue/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,7 +33,11 @@
     "dist"
   ],
   "keywords": [
-    "standardagent"
+    "standardagent",
+    "agent",
+    "diagram",
+    "drawio",
+    "webassembly"
   ],
   "standardagent": {
     "entryAgents": [
@@ -33,6 +46,10 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "node scripts/build.mjs && tsc -p tsconfig.json",
@@ -45,7 +62,7 @@
     "zod": "^4.6.7"
   },
   "peerDependencies": {
-    "@standardagents/spec": ">=0.2.0"
+    "@standardagents/spec": "^0.45.10"
   },
   "devDependencies": {
     "@standardagents/spec": "0.45.10",
