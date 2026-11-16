@@ -4,9 +4,10 @@
 import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
-const dist = new URL('../dist-test/', import.meta.url).pathname;
+const dist = fileURLToPath(new URL('../dist-test/', import.meta.url));
 const read = (path) => readFileSync(join(dist, path), 'utf8');
 
 function htmlFiles(folder = dist) {

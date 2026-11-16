@@ -1,0 +1,3 @@
+# The diagram tests compare these files byte for byte, so Git must not change
+# their line endings on checkout.
+examples/diagram-agent/test/fixtures/** -text

@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "CATALOGUE_FIXTURES=tests/fixtures astro build --outDir dist-test && node --test tests/*.test.mjs",
+    "test": "node tests/run.mjs",
     "astro": "astro"
   },
   "dependencies": {

@@ -104,5 +104,6 @@ src/
 └── styles/global.css
 tests/
 ├── fixtures/                  # Saved registry responses for the tests
+├── run.mjs                    # Builds from the fixtures, then runs the tests
 └── site.test.mjs
 ```
