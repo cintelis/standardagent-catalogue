@@ -180,7 +180,7 @@ catalogue's build does not include them.
 <div align="center">
 <img src="examples/motion-agent/test/fixtures/expected/02-logo-reveal.svg" alt="The catalogue logo assembles, and its name fades in" width="60%">
 <br>
-<sub>Animated by the motion sample from <a href="examples/motion-agent/test/fixtures/specs/02-logo-reveal.json">a 20-line spec</a>. The file holds no script. Reload the page to play it again.</sub>
+<sub>Animated by the motion sample from <a href="examples/motion-agent/test/fixtures/specs/02-logo-reveal.json">a 21-line spec</a>. The file holds no script. Reload the page to play it again.</sub>
 </div>
 
 ### WebAssembly or a container
