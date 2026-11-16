@@ -171,6 +171,11 @@ the third, the work is done by an ordinary JavaScript library.
 Each sample is a separate package with its own dependencies and tests, and the
 catalogue's build does not include them.
 
+The two published ones are also [MCP](https://modelcontextprotocol.io) servers:
+`npx -y @cintelisai/diagram-agent` and `npx -y @cintelisai/motion-agent` give
+Claude, Cursor, and other MCP clients the same tools, with no Standard Agent
+runtime.
+
 <div align="center">
 <img src="examples/diagram-agent/test/fixtures/expected/01-order-flow.p1.svg" alt="An order-flow diagram that the diagram sample drew" width="90%">
 <br>

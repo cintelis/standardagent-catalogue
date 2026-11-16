@@ -111,6 +111,8 @@ What a sample must hold to:
 - **Use a library only if it runs without a browser.** The motion agent uses
   Anime.js this way. Pin it to one exact release.
 - **Pin dependencies.** Commit `pnpm-lock.yaml` and `Cargo.lock`.
+- **Keep Node out of `src/`.** Code that needs Node, such as the MCP server in
+  `bin/mcp.mjs`, lives outside it, so that the rest still runs on Workers.
 
 The root README's "WebAssembly or a container" section says what belongs in
 WebAssembly and what needs a sandbox service.

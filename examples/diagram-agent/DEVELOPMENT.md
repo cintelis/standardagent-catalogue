@@ -76,6 +76,25 @@ requester ──▶ agent (diagram_designer)      src/agents/diagram_designer.ts
 7. **`src/index.ts`** and **`package.json`**. What the package exports and
    declares.
 
+## The MCP server
+
+`bin/mcp.mjs` serves the package's tools over the Model Context Protocol, for
+clients that are not Standard Agent runtimes. It is the package's command, so
+`npx -y @cintelisai/diagram-agent` starts it.
+
+- It is plain JavaScript, outside `src/`, because it is the one part of the
+  package that needs Node. Everything in `src/` also runs on Cloudflare
+  Workers.
+- It writes the protocol out by hand: JSON-RPC 2.0, one message on each line.
+  The package gains no dependency that way. `test/mcp.test.mjs` connects the
+  official MCP client to it, which is what shows that a real client
+  understands it. The SDK is a dev dependency, for that test only.
+- It adds nothing to the tools. It checks the arguments with the tool's own
+  schema, runs the tool's own `execute`, and passes the result on.
+- The agent's prompt goes to the client twice: as the server's instructions,
+  and as a prompt the user can pick.
+- The same file, but for two names, is in the other sample that has one.
+
 ## The two WebAssembly loaders
 
 `src/wasm.ts` imports `#wasm-module`. The `imports` field in `package.json`

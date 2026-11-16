@@ -1,7 +1,7 @@
 {
   "name": "@cintelisai/motion-agent",
-  "version": "0.1.0",
-  "description": "A Standard Agent that designs animated SVG pictures. It writes a scene and a timeline, computes the motion with Anime.js, and returns one SVG file that plays without script.",
+  "version": "0.2.0",
+  "description": "A Standard Agent, and an MCP server, that designs animated SVG pictures. It writes a scene and a timeline, computes the motion with Anime.js, and returns one SVG file that plays without script.",
   "license": "MIT",
   "author": "Cintelis",
   "homepage": "https://github.com/cintelis/standardagent-catalogue/tree/main/examples/motion-agent#readme",
@@ -22,12 +22,18 @@
       "import": "./dist/index.js"
     }
   },
+  "bin": {
+    "motion-agent": "./bin/mcp.mjs"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "keywords": [
     "standardagent",
     "agent",
+    "mcp",
+    "mcp-server",
     "animation",
     "svg",
     "animejs"
@@ -60,6 +66,7 @@
     "@standardagents/spec": "^0.45.10"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
     "@standardagents/spec": "0.45.10",
     "typescript": "^7.0.2"
   }
