@@ -2,7 +2,7 @@
 // Run `pnpm test`, which builds first.
 
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { validateAgentDefinition } from '@standardagents/spec';
 
@@ -14,6 +14,7 @@ import {
   ZONE_COLOURS,
   slugify,
 } from '../dist/tools/create_diagram.js';
+import { WASM_BASE64 } from '../dist/generated/wasm-bytes.js';
 import { createDiagram, DiagramSpecError, MAX_REQUEST_BYTES, specReference } from '../dist/wasm.js';
 
 const fixtures = new URL('./fixtures/', import.meta.url);
@@ -267,6 +268,26 @@ test('the definitions refer only to names inside the package', async () => {
     assert.ok(tool in pkg.tools, `tool "${tool}" is in the package`);
   }
   assert.equal((await pkg.models[prompt.model]()).name, prompt.model);
+});
+
+test('the package ships the module both ways', () => {
+  const dist = new URL('../dist/', import.meta.url);
+  // Node, Deno, Bun, and browsers get the base64 copy. Cloudflare Workers gets
+  // the file. Both must be the same module.
+  const file = readFileSync(new URL('drawgen_core.wasm', dist));
+  assert.ok(Buffer.from(WASM_BASE64, 'base64').equals(file), 'the file and the base64 copy match');
+  assert.ok(WebAssembly.validate(file));
+
+  const loaders = manifest.imports['#wasm-module'];
+  assert.deepEqual(Object.keys(loaders), ['workerd', 'default'], 'workerd comes before default');
+  for (const path of Object.values(loaders)) {
+    assert.ok(existsSync(new URL(`../${path}`, import.meta.url)), `${path} is built`);
+  }
+  // The Workers loader imports the file and leaves the base64 copy out.
+  const workerd = readFileSync(new URL('wasm-module.workerd.js', dist), 'utf8');
+  assert.match(workerd, /from '\.\/drawgen_core\.wasm'/);
+  assert.doesNotMatch(workerd, /wasm-bytes/);
+  assert.equal(manifest.exports['./drawgen_core.wasm'], './dist/drawgen_core.wasm');
 });
 
 test('__meta agrees with package.json', () => {

@@ -2,11 +2,12 @@
 // Run `pnpm test`, which builds first.
 
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { validateAgentDefinition } from '@standardagents/spec';
 
 import * as pkg from '../dist/index.js';
+import { WASM_BASE64 } from '../dist/generated/wasm-bytes.js';
 import { analyzeText, MAX_INPUT_BYTES } from '../dist/wasm.js';
 
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -93,6 +94,26 @@ test('the definitions refer only to names inside the package', async () => {
 
   const model = await pkg.models[prompt.model]();
   assert.equal(model.name, prompt.model);
+});
+
+test('the package ships the module both ways', () => {
+  const dist = new URL('../dist/', import.meta.url);
+  // Node, Deno, Bun, and browsers get the base64 copy. Cloudflare Workers gets
+  // the file. Both must be the same module.
+  const file = readFileSync(new URL('text_stats.wasm', dist));
+  assert.ok(Buffer.from(WASM_BASE64, 'base64').equals(file), 'the file and the base64 copy match');
+  assert.ok(WebAssembly.validate(file));
+
+  const loaders = manifest.imports['#wasm-module'];
+  assert.deepEqual(Object.keys(loaders), ['workerd', 'default'], 'workerd comes before default');
+  for (const path of Object.values(loaders)) {
+    assert.ok(existsSync(new URL(`../${path}`, import.meta.url)), `${path} is built`);
+  }
+  // The Workers loader imports the file and leaves the base64 copy out.
+  const workerd = readFileSync(new URL('wasm-module.workerd.js', dist), 'utf8');
+  assert.match(workerd, /from '\.\/text_stats\.wasm'/);
+  assert.doesNotMatch(workerd, /wasm-bytes/);
+  assert.equal(manifest.exports['./text_stats.wasm'], './dist/text_stats.wasm');
 });
 
 test('__meta agrees with package.json', () => {
