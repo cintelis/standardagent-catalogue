@@ -1,26 +1,105 @@
+<div align="center">
+
+<img src="docs/screenshots/banner.png" alt="Standard Agent Catalogue: agents you can install" width="100%">
+
 # Standard Agent Catalogue
 
-A static site that lists the Standard Agent packages published on npm. It hosts
-no packages. It reads the public npm registry when it builds, and it links back
-to npm.
+**An open index of the Standard Agent packages published on npm.**
+
+It hosts no packages. It reads the public npm registry when it builds,
+and it links back to npm.
+
+[![CI](https://github.com/cintelis/standardagent-catalogue/actions/workflows/ci.yml/badge.svg)](https://github.com/cintelis/standardagent-catalogue/actions/workflows/ci.yml)
+[![Deploy](https://github.com/cintelis/standardagent-catalogue/actions/workflows/deploy.yml/badge.svg)](https://github.com/cintelis/standardagent-catalogue/actions/workflows/deploy.yml)
+[![Astro 7](https://img.shields.io/badge/Astro-7-0c1411?style=flat-square&logo=astro&logoColor=white)](https://astro.build)
+[![Node 22 or later](https://img.shields.io/badge/node-%E2%89%A5%2022-0a7a58?style=flat-square&logo=nodedotjs&logoColor=white)](package.json)
+[![Samples: Rust to WebAssembly](https://img.shields.io/badge/samples-Rust%20%E2%86%92%20WebAssembly-0c1411?style=flat-square&logo=rust&logoColor=white)](#sample-agents)
+[![Hosting: Cloudflare](https://img.shields.io/badge/hosting-Cloudflare-0a7a58?style=flat-square&logo=cloudflare&logoColor=white)](#keeping-it-current)
+
+[What's inside](#whats-inside) · [How it works](#how-it-works) · [Run it yourself](#commands) · [Sample agents](#sample-agents) · [Deploy](#keeping-it-current)
+
+</div>
+
+---
+
+## Why
 
 The [Standard Agent Specification](https://standardagentspec.org) defines a
-packed agent as an npm package, so npm is the registry and this site is an index
-over it.
+packed agent as an npm package, so npm is the registry. What npm lacks is a
+place to browse only the agents. This site is that index: it finds the packages
+that carry the `standardagent` keyword, checks that each one declares its
+agents, and gives each a page.
 
-## What it lists
+Nobody uploads anything here. To be listed, publish a package to npm with the
+keyword and the field, and it appears the next time the site is built. The
+site's Publish page shows the exact `package.json`.
 
-| Page | Source |
+## What's inside
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/agents.png" alt="The list of agent packages">
+      <h3>Agents</h3>
+      <p>Every npm package with the <code>standardagent</code> keyword and a valid
+      <code>standardagent</code> field in <code>package.json</code>, with a search box that
+      filters as you type.</p>
+      <p><code>/</code> · <code>src/pages/index.astro</code></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/package.png" alt="The page of one agent package">
+      <h3>Agent page</h3>
+      <p>What one package declares: its entry agents, effects, thread endpoints, and the hooks it
+      adds to a parent, plus its version, licence, and links on npm.</p>
+      <p><code>/package/&lt;name&gt;/</code> · <code>src/pages/package/[...name].astro</code></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/ecosystem.png" alt="Providers, clients, and tooling">
+      <h3>Ecosystem</h3>
+      <p>Packages that support agents without being one: model providers, client libraries, and
+      tooling. They carry the <code>standardagents</code> keyword.</p>
+      <p><code>/ecosystem/</code> · <code>src/pages/ecosystem.astro</code></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/publish.png" alt="How to publish an agent">
+      <h3>Publish</h3>
+      <p>The two markers a package needs to be listed, and what its page will show. There are no
+      accounts and no upload form.</p>
+      <p><code>/publish/</code> · <code>src/pages/publish.astro</code></p>
+    </td>
+  </tr>
+</table>
+
+Two more addresses:
+
+| Address | What it is |
 |---|---|
-| Agents (`/`) | npm packages with the `standardagent` keyword and a valid `standardagent` field in `package.json` |
-| Agent page (`/package/<name>/`) | The package's entry agents, effects, thread endpoints, parent hooks, and npm details |
-| Ecosystem (`/ecosystem/`) | npm packages with the `standardagents` keyword: providers, clients, and tooling |
-| Runtimes (`/runtimes/`) | `src/data/runtimes.json`, kept by hand |
-| Publish (`/publish/`) | How to publish a package so that the catalogue lists it |
-| `/catalogue.json` | The same data as JSON |
+| `/runtimes/` | The runtimes that execute Standard Agents, from `src/data/runtimes.json`, kept by hand |
+| `/catalogue.json` | The whole catalogue as JSON, for tools and runtimes that want to read it |
 
 A package with the `standardagent` keyword but no valid field is left out, and
 the build prints its name.
+
+## How it works
+
+```mermaid
+flowchart LR
+    N[("npm registry<br/>keyword search + package.json")] --> L["src/lib/npm.ts<br/>checks every field"]
+    L --> A["Astro build<br/>static pages + catalogue.json"]
+    A --> C["Cloudflare<br/>static files + security headers"]
+    S(["Every day, and on a push to main"]) -.-> L
+```
+
+1. **Read.** The build searches npm for the two keywords and fetches the
+   `package.json` of each hit's latest version.
+2. **Check.** `src/lib/npm.ts` treats every field as untrusted: it checks the
+   type, caps the length, and keeps only plain `http` and `https` links.
+3. **Build.** Astro writes one static page for each agent, the lists, and
+   `catalogue.json`. No page needs a server.
+4. **Publish.** A GitHub Actions workflow builds every day and uploads the
+   files to Cloudflare. A failed or empty read publishes nothing.
 
 ## Commands
 
@@ -37,12 +116,45 @@ fails the build, so a broken read never publishes an empty catalogue.
 
 ## Keeping it current
 
-The data is as fresh as the last build. Rebuild and redeploy on a schedule, for
-example once a day, from the host's scheduled builds or a CI cron job. `dist/` is
-plain static files and deploys to any static host.
+The data is as fresh as the last build, so `.github/workflows/deploy.yml`
+builds the site from the registry and publishes it to Cloudflare:
 
-`public/_headers` sets security headers in the format that Cloudflare Pages and
-Netlify read. Another host needs the same headers in its own configuration.
+- every day at 03:17 UTC,
+- on a push to `main` that changes the site, and
+- when someone presses "Run workflow" on the Actions page.
+
+It does not publish when the registry read fails, or when the build finds no
+packages at all. The site that is already up stays up.
+
+`wrangler.jsonc` describes the deployment: the files in `dist/`, served as
+static files, with `dist/404.html` for an unknown address. No code runs on
+Cloudflare. Cloudflare reads `dist/_headers`, which comes from
+`public/_headers`, and sends its security headers with every response.
+
+### Set up the deployment
+
+The workflow needs two repository secrets. Until both exist it builds the site
+each day and deploys nothing.
+
+1. In the Cloudflare dashboard, create an API token from the "Edit Cloudflare
+   Workers" template, limited to the one account.
+2. In the GitHub repository, under Settings, then Secrets and variables, then
+   Actions, add:
+   - `CLOUDFLARE_API_TOKEN`: the token.
+   - `CLOUDFLARE_ACCOUNT_ID`: the account ID from the Cloudflare dashboard.
+3. Run the Deploy workflow from the Actions page. The first run creates a
+   Worker called `standardagent-catalogue` and prints its `workers.dev`
+   address.
+
+To use your own domain, add it to the Worker in the Cloudflare dashboard. To
+deploy by hand, run `pnpm build`, then `pnpm exec wrangler deploy`.
+
+GitHub turns off a scheduled workflow after 60 days without a commit to the
+repository. It sends an email first, and the Actions page has a button to turn
+the workflow back on.
+
+`dist/` is plain static files, so another host works too. It needs the headers
+from `public/_headers` in its own configuration.
 
 ## How it treats package data
 
@@ -76,6 +188,12 @@ Rust, compiled to WebAssembly, does the work behind its tools.
 Each sample is a separate package with its own dependencies and tests, and the
 catalogue's build does not include them.
 
+<div align="center">
+<img src="examples/diagram-agent/test/fixtures/expected/01-order-flow.p1.svg" alt="An order-flow diagram that the diagram sample drew" width="90%">
+<br>
+<sub>Drawn by the diagram sample from <a href="examples/diagram-agent/test/fixtures/specs/01-order-flow.json">a 20-line spec</a>. The file opens in draw.io for editing.</sub>
+</div>
+
 ### WebAssembly or a container
 
 The samples show a way to split an agent's work. Put the deterministic,
@@ -97,7 +215,49 @@ The diagram sample draws this line itself. It ports the diagram builder, the
 checker, and the SVG renderer, and it leaves out PNG and PDF export, because
 those need a desktop program.
 
+### Compared with LangChain and Copilot Studio
+
+The three answer different questions. A Standard Agent package is something you
+hand to other people. LangChain is a library you build your own service with.
+Copilot Studio is a hosted builder for agents inside an organisation's
+Microsoft 365.
+
+| | Standard Agent package with WebAssembly | LangChain or LangGraph | Microsoft Copilot Studio |
+|---|---|---|---|
+| What it is | A specification and a package format | A code library for Python and JavaScript | A low-code builder, run by Microsoft as a service |
+| What you make | An npm package of definitions: agents, prompts, models, tools | An application whose code drives the agent | An agent set up in a web designer: topics, knowledge, actions |
+| Who runs it | Whoever installs it, on a runtime that implements the specification | You, on your own servers, or on LangChain's hosted platform | Microsoft, in the organisation's tenant |
+| How others get it | `npm install` | They call your service, or deploy your code themselves | You publish it to Teams, Microsoft 365 Copilot, or a website |
+| Where the heavy work runs | In WebAssembly inside the package | In your process, or in containers and sandboxes that you provide | In connectors, Power Automate flows, or services that you host elsewhere |
+| What you provision | Nothing beyond the runtime | Compute, a database for state, and often a queue | Licences and an environment, but no servers |
+| Control over the agent loop | The runtime owns the loop. You declare the parts | Full. You write the loop | Limited to what the designer offers |
+| Reaching business systems | Tools that you write | Many ready-made integrations, and your own code | Ready-made connectors to Microsoft 365 and many other services |
+| Who builds it | Developers, in TypeScript and a language that compiles to WebAssembly | Developers, mostly in Python | Makers and analysts, with developers for the custom parts |
+
+**Choose a Standard Agent package** when the agent is a product in itself:
+something others install, run on their own runtime, and compose into their own
+agents, with its tools travelling inside it.
+
+**Choose LangChain or LangGraph** when you run the service and need to shape the
+agent's control flow yourself: custom state, branching, retries, or a Python
+stack with libraries that do not compile to WebAssembly.
+
+**Choose Copilot Studio** when the agent is for people inside one organisation,
+it works mostly on that organisation's Microsoft 365 data, and it should appear
+in Teams or Microsoft 365 Copilot under the organisation's existing sign-in and
+data policies.
+
+They also combine. A team can build an agent with LangChain and expose it to
+Copilot Studio as an action, and a WebAssembly module of the kind in these
+samples runs inside any JavaScript process, whichever framework drives it.
+
+This table describes each product in general terms as of November 2026. All
+three change often, and the Standard Agent column describes what this
+repository's samples show, not everything the specification allows.
+
 ## Continuous integration
+
+`.github/workflows/deploy.yml` publishes the site: see "Keeping it current".
 
 `.github/workflows/ci.yml` runs on every pull request and on pushes to `main`:
 
@@ -121,8 +281,14 @@ src/
 │   ├── runtimes.astro
 │   ├── publish.astro
 │   ├── catalogue.json.ts
+│   ├── 404.astro              # Shown for an unknown address
 │   └── package/[...name].astro
 └── styles/global.css
+.github/workflows/
+├── ci.yml                     # Tests, on every pull request and push to main
+└── deploy.yml                 # Builds from npm and publishes, every day
+wrangler.jsonc                 # How Cloudflare serves dist/
+docs/screenshots/              # The pictures in this README
 tests/
 ├── fixtures/                  # Saved registry responses for the tests
 ├── run.mjs                    # Builds from the fixtures, then runs the tests
