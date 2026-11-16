@@ -1,7 +1,7 @@
 {
   "name": "@cintelisai/diagram-agent",
-  "version": "0.1.1",
-  "description": "A Standard Agent that designs draw.io diagrams. A TypeScript agent drives a diagram builder, checker, and SVG renderer written in Rust and compiled to WebAssembly.",
+  "version": "0.2.0",
+  "description": "A Standard Agent, and an MCP server, that designs draw.io diagrams. A TypeScript agent drives a diagram builder, checker, and SVG renderer written in Rust and compiled to WebAssembly.",
   "license": "MIT",
   "author": "Cintelis",
   "homepage": "https://github.com/cintelis/standardagent-catalogue/tree/main/examples/diagram-agent#readme",
@@ -29,12 +29,18 @@
       "default": "./dist/wasm-module.js"
     }
   },
+  "bin": {
+    "diagram-agent": "./bin/mcp.mjs"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "keywords": [
     "standardagent",
     "agent",
+    "mcp",
+    "mcp-server",
     "diagram",
     "drawio",
     "webassembly"
@@ -65,6 +71,7 @@
     "@standardagents/spec": "^0.45.10"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
     "@standardagents/spec": "0.45.10",
     "typescript": "^7.0.2"
   }

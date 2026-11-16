@@ -31,6 +31,11 @@ runtime: see [What it does not do](#what-it-does-not-do).
 | Model | `designer_model` | Claude, through `@standardagents/anthropic`. The runtime supplies the API key |
 | Tool | `motion_reference` | Returns the spec format, the shapes, the easings, and the limits. The model reads it once |
 | Tool | `create_animation` | Builds an animation from a spec. Returns a check report and attaches the SVG |
+| Command | `motion-agent` | The same two tools as an MCP server, for clients that are not Standard Agent runtimes |
+
+There are three ways to use it: as an agent in a Standard Agent runtime, as an
+MCP server in a client such as Claude or Cursor, or by calling its tools from
+your own code.
 
 ## Use it
 
@@ -74,6 +79,45 @@ console.log(file, check.duration_ms, check.errors, check.warnings);
 // The picture: an SVG, as base64. Open the file in a browser to watch it.
 writeFileSync(file, Buffer.from(result.attachments[0].data, 'base64'));
 ```
+
+## Use it as an MCP server
+
+The package is also a [Model Context Protocol](https://modelcontextprotocol.io)
+server, so it works in Claude, Cursor, and other MCP clients with no Standard
+Agent runtime. The client's own model does the designing. The server gives it
+the same two tools, `motion_reference` and `create_animation`, the same checks, and the
+agent's instructions.
+
+Add it to the client's MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "motion": {
+      "command": "npx",
+      "args": ["-y", "@cintelisai/motion-agent", "--out", "./animations"]
+    }
+  }
+}
+```
+
+In Claude Code:
+
+```bash
+claude mcp add motion -- npx -y @cintelisai/motion-agent --out ./animations
+```
+
+Then ask for an animation, such as "a loading indicator with three dots".
+
+- **With `--out <folder>`**, the server saves each animation in that folder and
+  tells the model the path. This is the useful setting for a coding tool, which
+  can then put the file where you want it.
+- **Without it**, the server writes nothing to disk and returns the file's
+  text in the tool result.
+
+The server runs on your machine, over standard input and output. It opens no
+network connection and needs no API key. It reads nothing from disk, and
+writes only into the `--out` folder, under a name made from a hash and a slug.
 
 ## An animation spec
 
@@ -142,6 +186,9 @@ in Edge.
 - **It has not run on a hosted runtime.** Its tests load the package, check
   every definition, and run both tools. Nobody has yet run a full conversation
   through a runtime.
+- **The MCP server is tested with the official MCP client, not in each
+  product.** A test connects that client, lists the tools, and calls them. It
+  has not been tried inside every program that speaks MCP.
 - **It does not animate a web page.** It makes a file. It cannot attach to the
   elements of a page, follow a scroll, or answer a click, which Anime.js does
   in a browser.
@@ -189,7 +236,7 @@ signed with the Cintelis release key before it reaches npm. To check one, from
 a copy of that repository:
 
 ```bash
-scripts/verify-release.sh motion-agent-v0.1.0
+scripts/verify-release.sh motion-agent-v0.2.0
 ```
 
 In a project that has installed the package, `npm audit signatures` checks its
